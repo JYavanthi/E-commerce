@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
   import plant_protein from "../src/assets/vegan.jpg";
   import rstdPmpkn from "../src/assets/rstdPmpkn.jpg";
   import wtr_mln from "../src/assets/wtr_mln.jpg";
-  import grains from "../src/assets/grains.jpg";
+  import grains from "../src/assets/grains.jpg";    
   import honey from "../src/assets/honey.jpg";
 
 
