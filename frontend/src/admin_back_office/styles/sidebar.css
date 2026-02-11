@@ -1,0 +1,177 @@
+/* .ad-sidebar{
+  width:220px;
+  background:white;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
+
+.ad-logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#3aaa35;
+  margin-bottom:25px;
+}
+
+.ad-menu{
+  list-style:none;
+  padding:0;
+  margin:0;
+  flex:1;
+}
+
+.ad-menu li{
+display: flex;
+  padding: 9px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: 0.2s;
+    font-size: 16px;
+    font-weight: 600;
+    color: #3aaa35;
+    border-bottom: 1px solid black;
+}
+
+.ad-menu li:hover,
+.ad-menu li.active{
+  background:#c9efb6;
+}
+
+.ad-bottom span:hover,
+.ad-bottom span.active{
+  background:#c9efb6;
+}
+.ad-bottom{
+  margin-top: 100px;
+}
+
+
+.ad-bottom span{
+  display:flex;
+   padding: 9px;
+   align-items:center;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: 0.2s;
+    font-size: 16px;
+    font-weight: 600;
+    color: #3aaa35;
+    border-bottom: 1px solid black;
+}
+
+
+
+.ad-menu i{
+  margin-right: 15px;
+  margin-top: 0px;
+  color: #3aaa35;
+  width: auto;
+}
+
+.ad-bottom i{
+  margin-right: 15px;
+  margin-top: 0px;
+  color: #3aaa35;
+  width: auto;
+} */
+
+
+
+ .ad-sidebar{
+  width:220px;
+  background:white;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  box-sizing: border-box;
+}
+
+
+.ad-logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#3aaa35;
+  margin-bottom:25px;
+  text-transform: lowercase;
+}
+
+
+.ad-menu{
+  list-style:none;
+  padding:0;
+  margin:0;
+  flex:1;
+}
+
+
+.ad-menu li{
+  display: flex;                 
+  align-items: center;           
+  gap: 25px;                   
+  padding: 8px 12px;
+  /* border-radius: 10px; */
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: 0.2s;
+  font-size: 17px;
+  font-weight: 600;
+  color: #3aaa35;
+  border-bottom: 1px solid black;
+}
+
+
+.ad-menu li:hover
+{
+  background:#c9efb6;
+  border: 1px solid #a7df8f;
+}
+
+
+.ad-menu i{
+  font-size: 20px;
+  color: #3aaa35;
+  width: 20px;                  
+  text-align: center;
+}
+
+
+.ad-bottom{
+  margin-top: auto;             
+  padding-top: 30px;
+}
+
+
+.ad-bottom span{
+   display: flex;                 
+  align-items: center;           
+  gap: 25px;                     
+
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: 0.2s;
+  font-size: 17px;
+  font-weight: 600;
+  color: #3aaa35;
+  border: 1px solid transparent;
+  border-bottom: 1px soild black;
+}
+
+
+.ad-bottom span:hover{
+  background:#c9efb6;
+  border: 1px solid #a7df8f;
+}
+
+
+.ad-bottom i{
+  font-size: 20px;
+  color: #3aaa35;
+  width: 20px;                 
+  text-align: center;
+} 

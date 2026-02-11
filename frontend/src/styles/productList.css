@@ -1,0 +1,108 @@
+.productlist-page{
+  padding:40px 60px;
+  background:#fffdf3;
+}
+
+.productlist-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:30px;
+}
+
+/* CARD */
+.plist-card{
+  position:relative;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.08);
+  padding:10px;
+  transition:0.3s;
+}
+
+.plist-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+
+/* TAG */
+.plist-tag{
+  position:absolute;
+  top:12px;
+  left:12px;
+  background:#111;
+  color:#fff;
+  padding:6px 12px;
+  font-size:12px;
+  border-radius:4px;
+  font-weight:600;
+}
+
+/* IMAGE */
+.plist-img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  cursor:pointer;
+  border-radius: 10px;
+}
+
+/* BODY */
+.plist-body{
+  text-align:center;
+}
+
+.plist-title{
+  font-size:16px;
+  font-weight:600;
+  margin:12px 0;
+}
+
+/* PRICE */
+.plist-price{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  align-items:center;
+}
+
+.plist-mrp{
+  text-decoration:line-through;
+  color:#888;
+  font-size:14px;
+}
+
+.plist-final{
+  font-size:18px;
+  font-weight:700;
+  color:#111;
+}
+
+/* ACTIONS */
+.plist-actions{
+  margin-top:15px;
+  display:flex;
+  justify-content:center;
+  gap:70px;
+}
+
+.plist-wish{
+  border:1px solid #ddd;
+  background:#fff;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.plist-wish.active{
+  
+  color:red;
+}
+
+.plist-cart{
+  background:#111;
+  color:#fff;
+  border:none;
+  padding:8px 18px;
+  border-radius:6px;
+  cursor:pointer;
+}

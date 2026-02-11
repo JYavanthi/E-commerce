@@ -1,0 +1,755 @@
+body {
+  background: #fffdf3;
+  width: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+/* .product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 0px 126px;
+  width: 80%;
+} */
+
+.product-carousel {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.product-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* before css */
+
+
+/* .card {
+  background: #ffffff;
+  border-radius: 23px;
+  padding: 12px 8px;
+  box-shadow: 0 6px 2px rgba(0, 0, 0, 0.09);
+  border: 1px solid #e9e6d8;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-img {
+      width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 22px;
+    margin-bottom: 0px;
+    margin-right: 0px;
+    margin-left:0px;
+}
+
+.category {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #2a5835;
+  margin-bottom: 0px;
+  margin-left: 0px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f1f1f;
+  margin: 9px 0px -20px;
+}
+
+.desc {
+ font-size: 11px;
+    color: #6b6b6b;
+    line-height: 1.6;
+    margin-bottom: 17px;
+    margin-right: 0px;
+    margin-left: 0px;
+    margin-top: 25px;
+}
+
+.price-row {
+      display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    width: 100%;
+    margin-left: 0px;
+} */
+
+
+.card {
+  flex: 0 0 220px;
+    scroll-snap-align: start;
+    background: #fff;
+    border-radius: 30px;
+    padding: 15px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+
+
+.card-img {
+      width: 100%;
+    height: 144px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.category {
+  font-size: 12px;
+  color: #7a7a7a;
+  margin-top: 12px;
+}
+
+.title {
+  font-size: 15px;
+  margin: 6px 0;
+  font-weight: 500;
+  color: #1f1f1f;
+}
+
+.desc {
+  font-size: 12px;
+    color: #6b6b6b;
+    line-height: 1.5;
+    margin-top: -2px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  font-weight: 600;
+}
+
+.btn-row{
+      display: flex;
+    margin-top: 17px;
+    gap: 87px;
+    margin-left: -5px;
+}
+
+.wishlogo-prdct{
+  
+     background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  font-size: 25px;
+}
+.fa-regular, .far {
+    font-weight: 400;
+    font-size: 21px;
+}
+
+.wishlogo-prdct:focus,
+.wishlogo-prdct:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.wishlogo-prdct.active {
+   
+  color: red;          /* filled look */
+}
+
+
+.price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f6c2f;
+  letter-spacing: 0.5px;
+}
+
+.weight {
+  font-size: 14px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.cart-addbtn{
+  padding: 10px 11px;
+    border-radius: 24px;
+    border: 1px solid #b8c7b6;
+    background: #f7fdf4;
+    cursor: pointer;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  
+} 
+.cart-addbtn:hover {
+  background: #2c4d1f;
+  color: white;
+  border: 1px solid black;
+}
+
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 10px;
+  width: 96%;
+  margin-top: 22px;   /*extra for carousel*/
+}
+.cart-addbtn.added {
+  background-color: #daf3cd;
+  color: black;
+}
+
+
+.wellness-wrapper {
+  background: linear-gradient(90deg, #143D27, #3C784B);
+  margin: 60px auto;
+  padding: 0px 25px;
+  border-radius: 40px;
+  width: 90%;
+  max-width: 1280px;
+  color: white;
+}
+
+
+.wellness-content {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+
+.wellness-left {
+      flex: 1;
+    margin-top: 30px;
+    margin-left: 35px;
+}
+
+.wellness-title {
+  font-size: 21px;
+  letter-spacing: 3px;
+  font-weight: 400;
+  margin-bottom: 0px;
+  color:#cccc91;
+}
+ 
+
+
+.wellness-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.9;
+      color: #cccc91;
+}
+
+
+.wellness-tags {
+  flex: 1.6;
+  margin-top: 3px;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 18px;
+  margin-top: 20px
+}
+
+
+.tag {
+ background: rgba(26, 63, 26, 0);
+    border: 1.5px solid rgb(205 205 112 / 70%);
+    padding: 4px 8px;
+    color: white;
+    border-radius: 30px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    background: #0d340d;
+}
+
+
+.sub-tag {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 2px 7px;
+  color: white;
+  border-radius: 20px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.tag:hover,
+.sub-tag:hover {
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.why-wrapper {
+  text-align: center;
+  padding: 0px 20px;
+  color: #324d36;
+}
+
+.why-subtitle {
+  letter-spacing: 4px;
+  font-size: 15px;
+  color: #4a6a4b;
+  margin-bottom: 10px;
+}
+
+.why-title {
+  font-size: 30px;
+  letter-spacing: 3px;
+  font-weight: 500;
+  margin-bottom: 2opx;
+  margin-top: 0px;
+}
+
+.why-description {
+    font-size: 16px;
+    color: #8d7676;
+    max-width: 850px;
+    margin: 14px auto 35px;
+    line-height: 1.6;
+}
+
+.why-cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  
+}
+
+.why-card {
+  background: #ffffff;
+  width: 30%;
+  min-width: 310px;
+  padding: 0px;
+  border-radius: 25px;
+  box-shadow: 0px 0px 25px rgba(0,0,0,0.08);
+  text-align: left;
+  padding-left: 15px;
+}
+
+.icon-circle {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(180deg, #e8f2da, #f0edd8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    margin-top: 12px;
+    margin-left: 12px;
+}
+
+.icon-circle img {
+  width: 35px;
+  height: 35px;
+}
+.fa-solid, .fas {
+    font-weight: 1000;
+    font-size: 25px;
+}
+.card-title {
+     font-size: 24px;
+    margin-bottom: 0px;
+    color: #31643b;
+    font-weight: 300;
+    margin-top: 0px;
+    margin-left: 19px;
+
+}
+
+.card-desc {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    margin-left: 19px;
+    letter-spacing: 0px;
+}
+/* @media (max-width: 768px) {
+
+  
+  body {
+    overflow-x: hidden;
+    background:#F7F3EB ;
+  }
+
+  
+  .product-grid {
+                   grid-template-columns: repeat(2, 1fr);
+        padding: 0px 45px;
+        width: 112%;
+        gap: 35px;
+        background: #F7F3EB;
+        margin-left: -85px;
+  }
+
+  .card {
+    border-radius: 18px;
+  }
+
+  .card-img {
+    height: 180px;
+  }
+
+  .title {
+    font-size: 25px;
+  }
+
+  .desc {
+    font-size: 18px;
+        line-height: 1.2;
+
+  }
+
+  .price {
+    font-size: 22px;
+  }
+
+  .weight {
+    font-size: 20px;
+  }
+
+  .button-row {
+    width: 100%;
+    margin-right: 0;
+  }
+.add-btn {
+            padding: 8px 19px;
+        border-radius: 24px;
+        border: 1px solid #b8c7b6;
+        background: #f7fdf4;
+        cursor: pointer;
+        font-size: 18px;
+        letter-spacing: 1px;
+        margin-left: 22px;
+    }
+
+  
+  .wellness-wrapper {
+    padding: 0px 0px;
+    border-radius: 25px;
+    background-color: #F7F3EB;
+                    margin-left: 37px;
+  }
+
+  .wellness-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .wellness-left {
+   
+   margin-left: 109px;
+        text-align: center;
+        margin-top: 6px;
+  }
+
+  .wellness-title {
+            font-size: 28px;
+        letter-spacing: 2px;
+  }
+
+  .wellness-desc {
+    font-size: 16px;
+  }
+
+  .wellness-tags {
+    margin-top: -20px;
+  }
+
+  .tag-row {
+            justify-content: center;
+        margin-top: 10PX;
+  }
+  .tag {
+ background: rgba(26, 63, 26, 0);
+    border: 1.5px solid rgb(205 205 112 / 70%);
+    padding: 4px 8px;
+    color: white;
+    border-radius: 30px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    background: #0d340d;
+}
+.sub-tag {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 2px 7px;
+    color: white;
+    border-radius: 20px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+
+ 
+
+.why-subtitle {
+        letter-spacing: 4px;
+        font-size: 40px;
+        color: #4a6a4b;
+        margin-bottom: 4px;
+       margin-left: 20px;
+}
+
+.why-title {
+  font-size: 50px;
+        letter-spacing: 2px;
+        font-weight: 500;
+        margin-bottom: 2opx;
+        margin-top: 0px;
+        margin-left: 35px;
+}
+
+.why-description {
+           font-size: 19px;
+        color: #8d7676;
+        max-width: 900px;
+        margin: 30px 25px;
+        line-height: 1.6;
+        margin-left: 60px;
+        margin-top: -30px;
+        padding-right: 32px;
+        padding-left: 50px;
+    }
+
+
+.why-cards {
+          display: flex;
+        justify-content: center;
+        gap: 21px;
+        flex-wrap: wrap;
+        width: 120%;
+        
+        margin-left: -60px;
+  
+}
+
+
+.why-card {
+  background: #ffffff;
+       background: #ffffff;
+        width: 31%;
+        min-width: 298px;
+        padding: 0px 34px;
+        border-radius: 25px;
+        box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.08);
+        text-align: left;
+}
+
+.icon-circle {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(180deg, #e8f2da, #f0edd8);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+    margin-top: 12px;
+    margin-left: 12px;
+}
+
+.icon-circle img {
+  width: 35px;
+  height: 35px;
+}
+.fa-solid, .fas {
+    font-weight: 1000;
+    font-size: 25px;
+}
+.card-title {
+     font-size: 24px;
+    margin-bottom: 0px;
+    color: #31643b;
+    font-weight: 300;
+    margin-top: 0px;
+    margin-left: 19px;
+
+}
+
+.card-desc {
+        font-size: 15px;
+    color: #666;
+    line-height: 1.3;
+    margin-left: 10px;
+    letter-spacing: 1px;
+}
+} */
+
+
+/* mobile view 2 */
+
+/* =========================
+   MOBILE VIEW (TABLET + PHONE)
+   ========================= */
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  /* PRODUCT CAROUSEL */
+  .product-carousel {
+    padding: 15px 10px;
+    gap: 15px;
+  }
+
+  .card {
+    flex: 0 0 75%;
+    padding: 14px;
+    border-radius: 22px;
+  }
+
+  .card-img {
+    height: 130px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .desc {
+    font-size: 11px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .weight {
+    font-size: 12px;
+  }
+
+  .button-row {
+    margin-top: 15px;
+  }
+
+  .add-btn {
+    font-size: 8px;
+    padding: 8px 14px;
+  }
+
+  .link-btn {
+    font-size: 10px;
+  }
+
+  /* WELLNESS SECTION */
+  .wellness-wrapper {
+    padding: 0px 0px;
+    border-radius: 25px;
+  }
+
+  .wellness-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .wellness-left {
+    margin: 0;
+    text-align: center;
+    padding-left: 28px;
+  }
+
+  .wellness-title {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .wellness-desc {
+    font-size: 12px;
+  }
+
+  .wellness-tags {
+    margin-top: 0px;
+  }
+
+  .tag-row {
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .tag {
+    font-size: 10px;
+    padding: 4px 7px;
+  }
+
+  .sub-tag {
+    font-size: 7px;
+  }
+
+  /* WHY SECTION */
+  .why-wrapper {
+    padding: 10px;
+  }
+
+  .why-subtitle {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+
+  .why-title {
+    font-size: 22px;
+    letter-spacing: 2px;
+  }
+
+  .why-description {
+    font-size: 13px;
+    margin: 10px auto 25px;
+  }
+
+  .why-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .why-card {
+    width: 50%;
+    /* min-width: unset; */
+    border-radius: 20px;
+    padding-left: 0px;
+  }
+
+  .icon-circle {
+    width: 45px;
+    height: 45px;
+    margin-left: 12px;
+  }
+
+  .icon-circle img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .card-title {
+           font-size: 20px;
+        margin-left: 12px;
+  }
+  .card-desc {
+    font-size: 12px;
+    margin-left: 8px;
+    padding-bottom: 12px;
+  }
+}

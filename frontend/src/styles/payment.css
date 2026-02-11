@@ -1,0 +1,621 @@
+/* .payment-page {
+  background-color: #f7f3eb;
+  min-height: 100vh;
+}
+
+.payment-steps {
+    display: flex;
+    gap: 20px;
+    font-size: 20px;
+    margin-bottom: 36px;
+    margin-top: 27px;
+    margin-left: 391px;
+}
+
+.payment-steps .active {
+  color: orange;
+  font-weight: 600;
+}
+
+.payment-delivery-title{
+     font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    letter-spacing: 1px;
+    margin-top: 12px;
+    color: #1e7f6d
+}
+
+.payment-add-section{
+      margin-bottom:30px;
+      margin-right: 330px;
+}
+
+.payment-add {
+      margin-top: 1px;
+    margin-left: -14px;
+}
+
+.payment-add p{
+  margin: 5px 5px;
+}
+
+.payment-add .pymnt-add-1{
+     margin-top: -6px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.name{
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.type{
+  letter-spacing: 1px;
+  margin-left: 5px;
+  font-size: 14px;
+}
+
+.payment-address-card {
+      display: flex;
+    gap: 20px;
+    padding: 0px 8px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    margin: 0px 200px;
+    margin-left: 85px;
+    margin-bottom: -20px;
+}
+
+.payment-address-card.active {
+  border: 1px solid #1e7f6d;
+}
+
+.payment-address-card h4 {
+  margin: 0;
+  color: #1e7f6d;
+}
+
+.mobile{
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.payment-container {
+        margin: 30px auto;
+    padding: 20px;
+    margin-left: unset;
+    margin-left: 62px;
+    display: flex;
+    gap: 45px;
+    margin-right: 50px;
+    padding-top: 0px;
+}
+
+.payment-left {
+      background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding-top: 0px;
+    padding-bottom: 3px;
+    width: 600px;
+    border: 1px solid #1e7f6d;
+}
+
+.payment-right{
+flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  height: fit-content;
+}
+
+.pay-icon{
+  width: 35px;
+}
+
+.payment-section-title {
+          font-size: 18px;
+    font-weight: bold;
+    margin-bottom: -10px;
+    letter-spacing: 0.5px;
+    margin-left: 5px;
+    color: #055734;
+    border-bottom: 0.3px solid #eee;
+    padding-bottom: 14px;
+}
+
+.payment-box {
+  margin-bottom: 17px;
+    margin-top: 8px;
+}
+
+.payment-option {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+    gap: 42px;
+}
+.payment-title{
+      margin-top: -5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 11px;
+    color: #055734;
+}
+.payment-option:hover {
+  background-color: #f8f8f8;
+}
+
+.payment-option h4 {
+font-size: 15px;
+    color: #222;
+    margin-bottom: -8px;
+}
+
+.payment-option p {
+  font-size: 12px;
+  color: #666;
+}
+
+  .payment-select{
+    margin-left: 280px;
+  }  
+  .payment-select input{
+    position: relative;
+  }
+
+.total-amount {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+
+.pay-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pay-btn:hover {
+  background-color: #256428;
+}
+
+.payment-footer {
+  margin-top: 40px;
+  padding: 0px;
+  text-align: center;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+}
+
+.security-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.secure-badge {
+  width: 35px;
+  height: 35px;
+  background-color: #2e7d32;
+  color: white;
+  font-size: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secure-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.secure-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+.footer-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.footer-text span {
+  color: #1976d2;
+  cursor: pointer;
+}  */
+
+
+/* Page background */
+.payment-page {
+  background-color: #f7f3eb;
+  min-height: 100vh;
+}
+
+.payment-steps {
+    display: flex;
+    gap: 20px;
+    font-size: 20px;
+    margin-bottom: 36px;
+    margin-top: 27px;
+    margin-left: 391px;
+}
+
+.payment-steps .active {
+  color: orange;
+  font-weight: 600;
+}
+
+.payment-delivery-title{
+     font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    letter-spacing: 1px;
+    margin-top: 12px;
+    color: #1e7f6d
+}
+
+.payment-add-section{
+      margin-bottom:30px;
+      margin-right: 330px;
+}
+
+.payment-add {
+      margin-top: 1px;
+    margin-left: -14px;
+}
+.payment-add p{
+  margin: 5px 5px;
+}
+.payment-add .pymnt-add-1{
+     margin-top: -6px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+.name{
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+.type{
+  letter-spacing: 1px;
+  margin-left: 5px;
+  font-size: 14px;
+}
+
+.payment-address-card {
+      display: flex;
+    gap: 20px;
+    padding: 0px 8px;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    margin: 0px 200px;
+    margin-left: 82px;
+    margin-bottom: -20px;
+}
+
+.payment-address-card.active {
+  border: 1px solid #1e7f6d;
+}
+
+.payment-address-card h4 {
+  margin: 0;
+  color: #1e7f6d;
+}
+.mobile{
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Container */
+.payment-container {
+        margin: 30px auto;
+    padding: 20px;
+    margin-left: unset;
+    margin-left: 62px;
+    display: flex;
+    gap: 45px;
+    margin-right: 50px;
+    padding-top: 0px;
+}
+
+/* Left section */
+.payment-left {
+      background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding-top: 0px;
+    padding-bottom: 3px;
+    width: 600px;
+    border: 1px solid #1e7f6d;
+    
+}
+.payment-right{
+flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  height: fit-content;
+}
+
+.pay-icon{
+  width: 35px;
+}
+
+/* Section title */
+.payment-section-title {
+          font-size: 18px;
+    font-weight: bold;
+    margin-bottom: -10px;
+    letter-spacing: 0.5px;
+    margin-left: 5px;
+    color: #1e7f6d;
+    border-bottom: 0.3px solid #eee;
+    padding-bottom: 14px;
+}
+
+/* Payment options box */
+.payment-box {
+  margin-bottom: 17px;
+    margin-top: 8px;
+}
+
+/* ========================= */
+/* UPDATED ALIGNMENT PART   */
+/* ========================= */
+
+/* Each option row */
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 0px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+/* Title block stays same */
+.payment-title{
+      margin-top: -5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 11px;
+    color: #1e7f6d;
+}
+
+.payment-option:hover {
+  background-color: #f8f8f8;
+}
+
+.payment-option h4 {
+font-size: 15px;
+    color: #222;
+    margin-bottom: -8px;
+}
+
+.payment-option p {
+  font-size: 12px;
+  color: #666;
+}
+
+/* NEW: Text column spacing */
+.payment-option > div:nth-child(2) {
+  margin-left: 30px;
+}
+
+/* NEW: Radio button column – fixed width & aligned */
+.payment-select {
+  width: 60px;              /* same column width for all */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;       /* push to extreme right */
+}
+
+.payment-select input {
+  position: relative;
+  transform: scale(1.1);   /* slightly bigger, optional */
+}
+
+/* ========================= */
+/* END OF UPDATED PART      */
+/* ========================= */
+
+
+/* Contact details box */
+.contact-box {
+  margin-top: 25px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.contact-box h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.contact-box p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+/* Total amount */
+.total-amount {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+/* Pay button */
+.pay-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.pay-btn:hover {
+  background-color: #256428;
+}
+
+/* Footer */
+.payment-footer {
+  margin-top: 40px;
+  padding: 0px;
+  text-align: center;
+  background-color: #ffffff;
+  border-top: 1px solid #ddd;
+}
+
+/* Security row */
+.security-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.secure-badge {
+  width: 35px;
+  height: 35px;
+  background-color: #2e7d32;
+  color: white;
+  font-size: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secure-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.secure-sub {
+  font-size: 12px;
+  color: #666;
+}
+
+/* Footer text */
+.footer-text {
+  font-size: 12px;
+  color: #666;
+}
+
+.footer-text span {
+  color: #1976d2;
+  cursor: pointer;
+}
+
+/* ===== UPI MODAL POPUP ===== */
+
+.upi-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upi-modal-box {
+  background: #f7f3eb;
+  padding: 25px 30px;
+  border-radius: 12px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: popup 0.3s ease;
+}
+
+.upi-modal-box h3 {
+  margin-bottom: 5px;
+    color: #222;
+    margin-top: 0px;
+}
+
+.upi-modal-box p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* .upi-modal-box .upi-qr{
+  align-items: center;
+} */
+.upi-qr {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 30px;
+  margin-left: 46px;
+}
+
+.upi-close-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    background: #1e7f6d;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: -32px;
+}
+
+.upi-close-btn:hover {
+  background: #166356;
+}
+
+@keyframes popup {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
