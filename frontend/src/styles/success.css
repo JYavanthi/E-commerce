@@ -1,0 +1,151 @@
+.success-wrapper {
+    /* min-height: 100vh; */
+    background: #fffdf3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.success-card {
+  background: #fffef6;
+  width: 360px;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* Icon */
+.success-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.circle {
+    width: 79px;
+    height: 79px;
+    background: #dff5df;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: green;
+    font-size: 52px;
+    font-weight: bold;
+}
+
+.order-id {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.success-title {
+  margin: 5px 0;
+  font-size: 22px;
+}
+
+.success-sub {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 15px;
+}
+
+/* Product */
+.product-box {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0px 10px;
+  margin-bottom: 5px;
+}
+
+.product-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+}
+
+.product-info {
+  flex: 1;
+  text-align: left;
+  margin-left: 10px;
+  font-size: 12px;
+}
+
+.product-info  h4{
+ font-size: 14px;
+    color: #555;
+    margin-left: 20px;
+    margin-bottom: 0px;
+    margin-top: 10px;
+}
+
+.product-info p {
+    font-size: 12px;
+    color: #555;
+    margin-left: 20px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.product-info .scsqty{
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.product-price {
+  font-weight: bold;
+  color: #009688;
+}
+
+/* Details */
+.details {
+     text-align: left;
+    font-size: 13px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px 20px;
+}
+
+.details .k{
+  letter-spacing: 0.5px;
+  color: #555;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.total {
+  font-weight: bold;
+  font-size: 15px;
+  color: #009688;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.continue {
+  background: #00796b;
+  color: white;
+}
+
+.invoice {
+  background: #2ecc71;
+  color: white;
+}

@@ -1,0 +1,404 @@
+.signup-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  position: relative;
+}
+
+.back-home{
+  position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    border-radius: 30px;
+    padding: 4px 4px;
+    background-color: beige;
+    font-size: 11px;
+    border: 1px solid brown;
+}
+
+.signup-card {
+  display: flex;
+  width: 900px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* LEFT */
+.signup-left {
+  flex: 1;
+  padding: 40px;
+  background: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+
+.signup-left h2 {
+ font-size: 29px;
+    color: #7a4a00;
+    margin-bottom: 0px;
+    margin-top: -19px;
+    margin-left: 35px;
+    letter-spacing: 1px;
+}
+
+.signup-left h2 span {
+  color: #4f8f2a;
+}
+
+.plant-img {
+  width: 88%;
+    max-width: 607px;
+    position: absolute;
+    bottom: 8px;
+    height: auto;
+    left: -27px;
+    z-index: 99;
+}
+.plant-img img{
+    font-size: 10px;
+}
+/* RIGHT */
+.signup-right {
+  flex: 1;
+  padding: 40px;
+  background: #fff6d6;
+}
+
+.signup-right h2 {
+text-align: center;
+    margin-bottom: 7px;
+    color: #7a4a00;
+    margin-top: -31px;
+    font-size: 35px;
+    letter-spacing: 1px;
+}
+.up{
+    color: green;
+}
+
+.signup-right form {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-right label {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #7a4a00;
+}
+
+.signup-right input {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  margin-bottom: 12px;
+}
+
+.signup-btn {
+  background: #4f8f2a;
+  color: white;
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+      margin-top: 17px;
+}
+
+.signup-btn:hover {
+  background: #3f7422;
+}
+
+.divider {
+  text-align: center;
+  margin: 16px 0;
+  font-weight: 500;
+  color: #7a4a00;
+}
+
+.social-login {
+  display: flex;
+  gap: 10px;
+}
+
+.social-login button {
+  flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 7px 0px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    padding-left: 0px;
+    letter-spacing: 1px;
+}
+.social-login button img {
+  width: 24px;
+  height: 24px;
+}
+.google {
+  background: white;
+}
+
+.facebook {
+  background: white;
+} 
+/* @media (max-width: 768px) {
+  .signup-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+}
+
+.signup-card {
+  display: flex;
+  width: 900px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+          height: 920px;
+                  background: #fff6d6;
+}
+
+
+.signup-left {
+  flex: 1;
+  padding: 40px;
+  background: #ffffff;
+  position: relative;
+  z-index: 1;
+  display: none;
+}
+
+.signup-left h2 {
+ font-size: 29px;
+    color: #7a4a00;
+    margin-bottom: 0px;
+    margin-top: -19px;
+    margin-left: 35px;
+    letter-spacing: 1px;
+}
+
+.signup-left h2 span {
+  color: #4f8f2a;
+}
+
+.plant-img {
+  width: 88%;
+    max-width: 607px;
+    position: absolute;
+    bottom: 8px;
+    height: auto;
+    left: -27px;
+    z-index: 99;
+}
+.plant-img img{
+    font-size: 10px;
+}
+
+.signup-right {
+  flex: 1;
+         padding: 100px 30px;
+  background: #e8f2da;
+}
+
+.signup-right h2 {
+        text-align: center;
+        margin-bottom: 90px;
+        color: #7a4a00;
+        margin-top: -18px;
+        font-size: 47px;
+        letter-spacing: 1px;
+}
+.up{
+    color: green;
+}
+
+.signup-right form {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-right label {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #7a4a00;
+}
+
+.signup-right input {
+          padding: 14px;
+        border-radius: 6px;
+        border: none;
+        margin-bottom: 23px;
+        font-size: 16px;
+}
+
+.signup-btn {
+ background: #4f8f2a;
+        color: white;
+        padding: 17px;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        font-size: 23px;
+        margin-top: 40px;
+        font-weight: 550;
+        letter-spacing: 3px;
+}
+
+.signup-btn:hover {
+  background: #3f7422;
+}
+
+.divider {
+          text-align: center;
+        margin: 40px 0;
+        font-weight: 500;
+        color: #7a4a00;
+        font-size: 23px;
+}
+
+.social-login {
+  display: flex;
+  gap: 50px;
+}
+
+.social-login button {
+  flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 12px 0px;
+        border-radius: 40px;
+        border: none;
+        cursor: pointer;
+        padding-left: 0px;
+        font-size: 20px;
+}
+.social-login button img {
+  width: 29px;
+  height: 29px;
+}
+.google {
+  background: white;
+}
+
+.facebook {
+  background: white;
+} 
+} */
+
+
+/* mobile view 2 */
+
+/* =========================
+   MOBILE RESPONSIVE STYLES
+   ========================= */
+
+@media (max-width: 768px) {
+
+  .signup-page {
+    padding: 0px;
+    align-items: flex-start;
+  }
+
+  .signup-card {
+    flex-direction: column;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 16px;
+  }
+
+  /* LEFT SECTION */
+  .signup-left {
+    padding: 20px 25px 9px;
+    text-align: center;
+  }
+
+  .signup-left h2 {
+    font-size: 28px;
+    margin: 0;
+    margin-bottom: 10px;
+  }
+
+  /* Hide large plant image on mobile */
+  .plant-img {
+    display: none;
+  }
+
+  /* RIGHT SECTION */
+  .signup-right {
+                padding: 0px 45px;
+
+  }
+
+  .signup-right h2 {
+   font-size: 35px;
+        margin-bottom: 50px;
+        margin-top: 40px;
+  }
+
+  .signup-right label {
+    font-size: 15px;
+  }
+
+  .signup-right input {
+    padding: 14px;
+        font-size: 15px;
+        margin-bottom: 22px;
+    }
+  
+
+  .signup-btn {
+    font-size: 20px;
+    padding: 16px;
+    margin-top: 23px;
+    letter-spacing: 1px;
+  }
+
+  .divider {
+    font-size: 13px
+  }
+
+  /* SOCIAL LOGIN */
+  .social-login {
+    flex-direction: column;
+    gap: 20px;
+    padding: 0px 57px;
+  }
+
+  .social-login button {
+    padding: 12px;
+        font-size: 17px;
+        letter-spacing: 2px;
+        font-weight: 600;
+  }
+  .social-login .facebook{
+    margin-bottom: 160px;
+  }
+  .social-login button img {
+    width: 30px;
+    height: 30px;
+}
+}
+
+/* EXTRA SMALL DEVICES */
+@media (max-width: 400px) {
+
+  .signup-right h2 {
+    font-size: 22px;
+  }
+
+  .signup-left h2 {
+    font-size: 20px;
+  }
+}
