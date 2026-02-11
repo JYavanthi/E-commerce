@@ -10,7 +10,7 @@ export default function AboutPage() {
       <h1 className="story-title">FROM BIHAR'S HEARTLAND TO GLOBAL KITCHENS</h1>
 
       {/* TWO COLUMN LAYOUT */}
-      <div className="two-col">
+      <div className="two-col">   
 
         {/* LEFT COLUMN */}
         <div className="left-col">
