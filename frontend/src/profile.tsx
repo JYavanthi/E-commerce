@@ -365,7 +365,7 @@ const Profile = () => {
         <div className="profile-content">
 
           {/* SIDEBAR */}
-          <div className="profile-sidebar">
+          <div className="prfl-sidebar">
             <button className="active">MY ORDERS</button>
             <button onClick={() => navigate("/address")}>SAVED ADDRESS</button>
             <button onClick={() => navigate("/t&c")}>TERMS & CONDITIONS</button>
@@ -399,8 +399,21 @@ const Profile = () => {
 
             {orders.map(order => (
               <div key={order.orderId} className="order-box">
+                <div className="order-footer">
+                  <p>
+                    Order ID : <strong>#{order.orderId}</strong>
+                  </p>
+
+                  <a
+                    href={`http://localhost:4000/api/order/${order.orderId}/invoice`}
+                    download
+                  >
+                    Download Invoice
+                  </a>
+                </div>
 
                 {order.items.map((item, idx) => (
+                  
                   <div className="order-card" key={idx}>
                     <img src={item.imageUrl} alt={item.productName} />
 
@@ -417,11 +430,13 @@ const Profile = () => {
                           : order.orderStatus}
                       </span>
                       <p>{order.orderDate}</p>
+                      <p className="ord-ttl"><span>₹
+                         {item.price}</span></p>
                     </div>
                   </div>
                 ))}
 
-                <div className="order-footer">
+                {/* <div className="order-footer">
                   <p>
                     Order ID : <strong>#{order.orderId}</strong>
                   </p>
@@ -432,7 +447,7 @@ const Profile = () => {
                   >
                     Download Invoice
                   </a>
-                </div>
+                </div> */}
 
               </div>
             ))}

@@ -65,9 +65,22 @@ const Payment = () => {
           })),
           totalAmount: finalTotal,
           taxAmount: gst,
-          paymentMode: selectedMethod === "upi" ? "PHONEPE" : "COD"
-        }
-      );
+          paymentMode: selectedMethod === "upi" ? "PHONEPE" : "COD",
+
+          shippingAddress: {
+      name: selectedAddress.name,
+      mobile: selectedAddress.mobile,
+      flat: selectedAddress.flat,
+      street: selectedAddress.street,
+      landmark: selectedAddress.landmark,
+      city: selectedAddress.city,
+      state: selectedAddress.state,
+      pincode: selectedAddress.pincode,
+      type: selectedAddress.type
+    }
+  }
+);
+      
 
       const orderId = orderRes.data.orderId;
 

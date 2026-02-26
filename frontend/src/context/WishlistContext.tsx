@@ -130,25 +130,52 @@ export const WishlistProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   /* ✅ LOAD WISHLIST */
+  // const loadWishlist = async (userId: number) => {
+  //   const res = await fetch(`${API_URL}${API_URLS.WISHLIST}/${userId}`);
+  //   const data = await res.json();
+
+  //   setWishlistItems(
+  //     Array.isArray(data)
+  //       ? data.map((item: any) => ({
+  //           wishlistId: item.WishlistID,
+  //           id: item.ProductID,
+  //           title: item.ProductName,
+  //           price: Number(item.Price),
+  //           img: item.ImageUrl,
+  //           weight: item.ProductWeight,
+  //           desc: "",
+  //           category: "",
+  //         }))
+  //       : []
+  //   );
+  // };
   const loadWishlist = async (userId: number) => {
+  try {
     const res = await fetch(`${API_URL}${API_URLS.WISHLIST}/${userId}`);
-    const data = await res.json();
+    const result = await res.json();
+
+    // 🔥 IMPORTANT FIX
+    const wishlistArray = Array.isArray(result)
+      ? result                 // if backend returns array
+      : result.data || [];     // if backend returns { success, data }
 
     setWishlistItems(
-      Array.isArray(data)
-        ? data.map((item: any) => ({
-            wishlistId: item.WishlistID,
-            id: item.ProductID,
-            title: item.ProductName,
-            price: Number(item.Price),
-            img: item.ImageUrl,
-            weight: item.ProductWeight,
-            desc: "",
-            category: "",
-          }))
-        : []
+      wishlistArray.map((item: any) => ({
+        wishlistId: item.WishlistID,
+        id: item.ProductID,
+        title: item.ProductName,
+        price: Number(item.Price),
+        img: item.ImageUrl || "",   // ✅ now image will render
+        weight: item.ProductWeight || "",
+        desc: item.ProductDescription || "",
+        category: item.CategoryName || "",
+      }))
     );
-  };
+  } catch (error) {
+    console.error("Wishlist load error:", error);
+    setWishlistItems([]);
+  }
+};
 
   useEffect(() => {
     if (userId) loadWishlist(userId);

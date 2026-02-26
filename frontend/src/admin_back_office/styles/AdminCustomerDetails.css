@@ -1,0 +1,169 @@
+.adm-cst-dtls-wrapper {
+  background: #eaf6e3;
+  padding: 40px;
+  font-family: Arial, sans-serif;
+}
+
+/* ACCOUNT SECTION */
+.adm-cst-dtls-account-section {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.adm-cst-dtls-profile-card {
+  width: 280px;
+  background: #f6f6f6;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.adm-cst-dtls-profile-img {
+  width: 130px;
+  height: 130px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.adm-cst-dtls-id {
+  font-size: 13px;
+  color: gray;
+}
+
+.adm-cst-dtls-contact {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* DETAILS CARD */
+.adm-cst-dtls-details-card {
+  flex: 1;
+  background: #f6f6f6;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.adm-cst-dtls-details-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.adm-cst-dtls-details-grid {
+  display: flex;
+  gap: 20px;
+}
+
+.adm-cst-dtls-box {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.adm-cst-dtls-shipping-wrapper {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.adm-cst-dtls-ship-box {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.adm-cst-dtls-ship-box h4 {
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+/* ORDER HISTORY */
+.adm-cst-dtls-history-section {
+  margin-bottom: 40px;
+}
+
+.adm-cst-dtls-section-title {
+  text-align: center;
+  color: #2e7d32;
+  margin-bottom: 20px;
+}
+
+.adm-cst-dtls-order-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  gap: 20px;
+  position: relative;
+}
+
+.adm-cst-dtls-order-card img {
+  width: 150px;
+  border-radius: 10px;
+}
+
+.adm-cst-dtls-order-info {
+  flex: 1;
+}
+
+.adm-cst-dtls-order-id {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: gray;
+}
+
+.adm-cst-dtls-status {
+  text-align: right;
+  color: green;
+  font-weight: bold;
+}
+
+/* WISHLIST */
+.adm-cst-dtls-wishlist-row {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+}
+
+.adm-cst-dtls-wishlist-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 150px;
+}
+
+.adm-cst-dtls-wishlist-card img {
+  width: 100px;
+  margin-bottom: 10px;
+}
+
+.adm-cst-dtls-wishlist-card button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.adm-cst-dtls-wishlist-card button.out {
+  background: #e91e63;
+}
+
+.adm-cst-dtls-seeall {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  cursor: pointer;
+}

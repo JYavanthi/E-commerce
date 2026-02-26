@@ -12,7 +12,7 @@ const TermsConditions = () => {
       <div className="profile-page">
         <div className="profile-content-add">
           {/* SIDEBAR */}
-          <div className="profile-sidebar">
+          <div className="prfl-sidebar">
             <button onClick={() => navigate("/profile")}>MY ORDERS</button>
             <button onClick={() => navigate("/address")}>SAVED ADDRESS</button>
             <button className="active">TERMS & CONDITIONS</button>

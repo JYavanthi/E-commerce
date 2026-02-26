@@ -5,7 +5,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useCart } from "../context/CartContext";
 import { toast } from "react-hot-toast";
 
-function Navbar() {
+function Navbar() { 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { wishlistItems } = useWishlist();

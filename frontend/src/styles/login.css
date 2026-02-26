@@ -340,8 +340,9 @@
   .login-card {
     flex-direction: column;
     width: 100%;
-    max-width: 420px;
+    /* max-width: 420px; */
     border-radius: 16px;
+    height: auto;
   }
 
   /* LEFT SECTION */

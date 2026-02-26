@@ -1,0 +1,124 @@
+/* Overlay */
+.admin-slider-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 999;
+}
+
+/* Slider Panel */
+.admin-slider {
+position: fixed;
+    top: 0;
+    right: -450px;
+    width: 380px;
+    height: 100%;
+    background: #f6f6f6;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+    transition: 0.4s ease;
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+    padding-top: 6px;
+}
+
+.admin-slider.open {
+  right: 0;
+}
+
+/* Header */
+.admin-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #9ccc65;
+  /* padding-bottom: 10px; */
+}
+
+.admin-slider-header span {
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* Upload */
+.admin-slider-image-upload {
+ width: 284px;
+    height: 151px;
+    background: #dbeeff;
+    border-radius: 10px;
+    margin: 30px auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.admin-slider-plus {
+  width: 0px;
+  height: 85px;
+  background: #8bc34a;
+  border-radius: 50%;
+  color: white;
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.admin-slider-upload-text {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.admin-slider-body label {
+  display: block;
+  margin-top: 15px;
+}
+
+.admin-slider-body input,
+.admin-slider-body textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #8bc34a;
+  margin-top: 5px;
+}
+
+.admin-slider-body textarea {
+  height: 100px;
+  border-radius: 15px;
+  resize: none;
+}
+
+.admin-slider-body small {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: gray;
+}
+
+/* Buttons */
+.admin-slider-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.publish-btn {
+  background: #aeea00;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.draft-btn {
+  background: white;
+  border: 1px solid #2e7d32;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+}

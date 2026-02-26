@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
   import plant_protein from "../src/assets/vegan.jpg";
   import rstdPmpkn from "../src/assets/rstdPmpkn.jpg";
   import wtr_mln from "../src/assets/wtr_mln.jpg";
-  import grains from "../src/assets/grains.jpg";    
+  import grains from "../src/assets/grains.jpg";
   import honey from "../src/assets/honey.jpg";
 
 
@@ -46,27 +46,59 @@ const ProductGrid = () => {
   29: plant_protein,
 };
 
- useEffect(() => {
+//  useEffect(() => {
+//   setLoading(true);
+
+//   fetch(`${API_URLS.BASE_URL}${API_URLS.PRODUCTS}`)
+//     .then((res) => res.json())
+//     .then((data) => {
+//       console.log("API DATA 👉", data);
+
+//       if (!Array.isArray(data)) {
+//         setProducts([]);
+//         return;
+//       }
+
+//       const mappedProducts: Product[] = data.map((item: any) => ({
+//         id: item.ProductID,
+//         category: item.CategoryName || "UNCATEGORIZED",
+//         title: item.ProductName,
+//         desc: item.ProductDescription,
+//         price: Number(item.Price) || 0,
+//         weight: item.ProductWeight || "",
+//         img: imageMap[item.ProductID] || plant_protein, 
+//       }));
+
+//       setProducts(mappedProducts);
+//     })
+//     .catch((err) => {
+//       console.error("API ERROR ❌", err);
+//       setProducts([]);
+//     })
+//     .finally(() => setLoading(false));
+// }, []);
+
+useEffect(() => {
   setLoading(true);
 
   fetch(`${API_URLS.BASE_URL}${API_URLS.PRODUCTS}`)
     .then((res) => res.json())
-    .then((data) => {
-      console.log("API DATA 👉", data);
+    .then((response) => {
+      console.log("API DATA 👉", response);
 
-      if (!Array.isArray(data)) {
+      if (!response.success || !Array.isArray(response.data)) {
         setProducts([]);
         return;
       }
 
-      const mappedProducts: Product[] = data.map((item: any) => ({
+      const mappedProducts: Product[] = response.data.map((item: any) => ({
         id: item.ProductID,
         category: item.CategoryName || "UNCATEGORIZED",
         title: item.ProductName,
         desc: item.ProductDescription,
         price: Number(item.Price) || 0,
         weight: item.ProductWeight || "",
-        img: imageMap[item.ProductID] || plant_protein, 
+        img: item.ImageUrl || imageMap[item.ProductID] || plant_protein,
       }));
 
       setProducts(mappedProducts);

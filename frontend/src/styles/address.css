@@ -14,7 +14,7 @@
   margin-bottom: 20px;
   letter-spacing: 2px;
 }
-   
+
 .address-card {
   display: flex;
   gap: 15px;
@@ -120,7 +120,7 @@
 }
 
 /* Sidebar */
-.profile-sidebar {
+/* .profile-sidebar {
   width: 230px;
   display: flex;
   flex-direction: column;
@@ -138,7 +138,7 @@
 
 .profile-sidebar button.active {
   font-weight: bold;
-}
+} */
 button{
   border-radius: 0px;
 }
@@ -224,7 +224,7 @@ button{
   border-radius: 4px;
   cursor: pointer;
       height: 35px;
-      margin-top: 71px;
+      margin-top: 0px;
     margin-bottom: 11px;
     margin-left: 161px;
     position: absolute;

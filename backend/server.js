@@ -8,7 +8,9 @@ const axios = require("axios");
 const crypto = require("crypto");
 const fs = require("fs");
 const app= express();
-app.use(express.json());
+// app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 require("dotenv").config();
@@ -48,6 +50,51 @@ sql.connect({ connectionString })
     trustServerCertificate: true
   }
 };
+// Create folder if not exists
+const categoryUploadPath = path.join(__dirname, "uploads/categories");
+
+if (!fs.existsSync(categoryUploadPath)) {
+  fs.mkdirSync(categoryUploadPath, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, categoryUploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 } // 5MB limit
+});
+
+const productUploadPath = path.join(__dirname, "uploads/products");
+
+if (!fs.existsSync(productUploadPath)) {
+  fs.mkdirSync(productUploadPath, { recursive: true });
+}
+
+const productStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, productUploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  }
+});
+
+const productUpload = multer({
+  storage: productStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
+
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //api creation
 app.get("/", (req, res) => {
@@ -551,6 +598,49 @@ app.put("/api/users/:id/recover", async (req, res) => {
 });
 
 //to display products from product master table
+// app.get("/api/products", async (req, res) => {
+//   try {
+//     const pool = await sql.connect(dbConfig);
+
+//     const query = `
+//       SELECT 
+//         p.ProductID,
+//         p.ProductName,
+//         p.ProductDescription,
+//         p.ProductWeight,
+//         c.CategoryName,
+//         pp.Price
+//       FROM ProductMaster p
+//       LEFT JOIN ProductCategory c 
+//         ON p.ProductCategoryID = c.ProductCategoryID
+//       LEFT JOIN ProductPriceMaster pp 
+//         ON p.ProductID = pp.ProductID
+//     `;
+
+//     const result = await pool.request().query(query);
+
+//     console.log("SQL RESULT 👉", result.recordset);
+
+//     const products = result.recordset.map(item => ({
+//       ProductID: item.ProductID,
+//       ProductName: item.ProductName,
+//       ProductDescription: item.ProductDescription,
+//       ProductWeight: item.ProductWeight,
+//       CategoryName: item.CategoryName,
+//       Price: item.Price,
+//       ImageUrl: `${item.ProductID}.jpg`,
+//     }));
+
+//     res.json(products);
+
+//   } catch (err) {
+//     console.error("PRODUCT API FAILED ❌", err);
+//     res.status(500).json({
+//       error: "Server error",
+//       details: err.message
+//     });
+//   }
+// });
 app.get("/api/products", async (req, res) => {
   try {
     const pool = await sql.connect(dbConfig);
@@ -560,19 +650,29 @@ app.get("/api/products", async (req, res) => {
         p.ProductID,
         p.ProductName,
         p.ProductDescription,
-        p.ProductWeight,
+        p.Quantity AS ProductWeight,
         c.CategoryName,
-        pp.Price
+        ISNULL(pp.Price, 0) AS Price,
+
+        (
+          SELECT TOP 1 AttachmentFile
+          FROM Attachments a
+          WHERE a.ProductID = p.ProductID
+          ORDER BY a.SortOrder ASC
+        ) AS ImageUrl
+
       FROM ProductMaster p
+
       LEFT JOIN ProductCategory c 
         ON p.ProductCategoryID = c.ProductCategoryID
+
       LEFT JOIN ProductPriceMaster pp 
         ON p.ProductID = pp.ProductID
+
+      ORDER BY p.CreatedDt DESC
     `;
 
     const result = await pool.request().query(query);
-
-    console.log("SQL RESULT 👉", result.recordset);
 
     const products = result.recordset.map(item => ({
       ProductID: item.ProductID,
@@ -581,73 +681,285 @@ app.get("/api/products", async (req, res) => {
       ProductWeight: item.ProductWeight,
       CategoryName: item.CategoryName,
       Price: item.Price,
-      ImageUrl: `${item.ProductID}.jpg`,
+      ImageUrl: item.ImageUrl
+        ? `http://localhost:4000${item.ImageUrl}`
+        : null
     }));
 
-    res.json(products);
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products
+    });
 
   } catch (err) {
-    console.error("PRODUCT API FAILED ❌", err);
+    console.error("❌ GET PRODUCTS ERROR:", err);
     res.status(500).json({
-      error: "Server error",
-      details: err.message
+      success: false,
+      message: "Failed to fetch products",
+      error: err.message
     });
   }
 });
 
 //to display ind products by id
+// app.get("/api/products/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const request = new sql.Request();
+//     request.input("id", sql.Int, id);
+
+//     const result = await request.query(`
+//       SELECT 
+//         p.ProductID,
+//         p.ProductName,
+//         p.ProductDescription,
+//         p.Quantity AS ProductWeight,
+//         ISNULL(pr.Price, 0) AS Price,
+//         ISNULL(pr.DiscountPrice, 0) AS DiscountPrice
+//       FROM ProductMaster p
+//       LEFT JOIN ProductPriceMaster pr 
+//         ON p.ProductID = pr.ProductID
+//       WHERE p.ProductID = @id
+//     `);
+
+//     if (!result.recordset || result.recordset.length === 0) {
+//       return res.status(404).json({ message: "Product not found" });
+//     }
+
+//     res.json(result.recordset[0]);
+
+//   } catch (err) {
+//     console.error("🔥 SINGLE PRODUCT API ERROR:", err);
+//     res.status(500).json({
+//       error: "Single product fetch failed",
+//       details: err.message
+//     });
+//   }
+// });
+// app.get("/api/products/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const pool = await sql.connect(dbConfig);
+
+//     const productResult = await pool.request()
+//       .input("id", sql.Int, id)
+//       .query(`
+//         SELECT 
+//           p.ProductID,
+//           p.ProductName,
+//           p.ProductDescription,
+//           p.Quantity AS ProductWeight,
+//           ISNULL(pr.Price, 0) AS Price,
+//           ISNULL(pr.DiscountPrice, 0) AS DiscountPrice
+//         FROM ProductMaster p
+//         LEFT JOIN ProductPriceMaster pr 
+//           ON p.ProductID = pr.ProductID
+//         WHERE p.ProductID = @id
+//       `);
+
+//     if (productResult.recordset.length === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Product not found"
+//       });
+//     }
+
+//     const imagesResult = await pool.request()
+//       .input("id", sql.Int, id)
+//       .query(`
+//         SELECT AttachmentFile
+//         FROM Attachments
+//         WHERE ProductID = @id
+//         ORDER BY SortOrder ASC
+//       `);
+
+//     const product = productResult.recordset[0];
+
+//     const images = imagesResult.recordset.map(img =>
+//       `http://localhost:4000${img.AttachmentFile}`
+//     );
+
+//     res.status(200).json({
+//       success: true,
+//       data: {
+//         ...product,
+//         Images: images
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error("❌ GET SINGLE PRODUCT ERROR:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch product",
+//       error: err.message
+//     });
+//   }
+// });
 app.get("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const request = new sql.Request();
-    request.input("id", sql.Int, id);
+    const pool = await sql.connect(dbConfig);
 
-    const result = await request.query(`
-      SELECT 
-        p.ProductID,
-        p.ProductName,
-        p.ProductDescription,
-        p.Quantity AS ProductWeight,
-        ISNULL(pr.Price, 0) AS Price,
-        ISNULL(pr.DiscountPrice, 0) AS DiscountPrice
-      FROM ProductMaster p
-      LEFT JOIN ProductPriceMaster pr 
-        ON p.ProductID = pr.ProductID
-      WHERE p.ProductID = @id
-    `);
+    // 🔹 PRODUCT DETAILS
+    const productResult = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT 
+          p.ProductID,
+          p.ProductName,
+          p.ProductDescription,
+          p.ProductWeight,
+          ISNULL(pr.Price, 0) AS Price,
+          ISNULL(pr.DiscountPrice, 0) AS DiscountPrice
+        FROM ProductMaster p
+        LEFT JOIN ProductPriceMaster pr 
+          ON p.ProductID = pr.ProductID
+        WHERE p.ProductID = @id
+      `);
 
-    if (!result.recordset || result.recordset.length === 0) {
-      return res.status(404).json({ message: "Product not found" });
+    if (productResult.recordset.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found"
+      });
     }
 
-    res.json(result.recordset[0]);
+    // 🔹 FETCH IMAGES FROM ATTACHMENTS TABLE
+    const imageResult = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT AttachmentFile
+        FROM Attachments
+        WHERE ProductID = @id
+          AND Section = 'PRODUCT'
+        ORDER BY Sortorder ASC
+      `);
+
+    const product = productResult.recordset[0];
+
+    const images = imageResult.recordset.map(img =>
+      `http://localhost:4000${img.AttachmentFile}`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        ...product,
+        Images: images
+      }
+    });
 
   } catch (err) {
-    console.error("🔥 SINGLE PRODUCT API ERROR:", err);
+    console.error("❌ PRODUCT DETAIL ERROR:", err);
     res.status(500).json({
-      error: "Single product fetch failed",
-      details: err.message
+      success: false,
+      message: "Failed to fetch product",
+      error: err.message
     });
   }
 });
 
 //to add products to product master table
+// app.post("/api/products", async (req, res) => {
+//   try { 
+//     const {
+//       ProductCategoryID,
+//       ProductName,
+//       ProductCode,
+//       ProductDescription,
+//       Quantity,
+//       SKU,
+//       Status,
+//       IsFeatured,
+//       CreatedBy
+//     } = req.body;
+
+//     // Basic validation
+//     if (!ProductCategoryID || !ProductName) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "ProductCategoryID and ProductName are required"
+//       });
+//     }
+
+//     const request = new sql.Request();
+
+//     request.input("ProductCategoryID", sql.Int, ProductCategoryID);
+//     request.input("ProductName", sql.NVarChar, ProductName);
+//     request.input("ProductCode", sql.NVarChar, ProductCode ?? null);
+//     request.input("ProductDescription", sql.NVarChar, ProductDescription ?? null);
+//     request.input("Quantity", sql.Int, Quantity ?? 0);
+//     request.input("SKU", sql.NVarChar, SKU ?? null);
+//     request.input("Status", sql.Bit, Status ?? 1);
+//     request.input("IsFeatured", sql.Bit, IsFeatured ?? 0);
+//     request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
+
+//     const query = `
+//       INSERT INTO dbo.ProductMaster
+//       (
+//         ProductCategoryID,
+//         ProductName,
+//         ProductCode,
+//         ProductDescription,
+//         Quantity,
+//         SKU,
+//         Status,
+//         IsFeatured,
+//         CreatedBy,
+//         CreatedDt
+//       )
+//       OUTPUT INSERTED.ProductID
+//       VALUES
+//       (
+//         @ProductCategoryID,
+//         @ProductName,
+//         @ProductCode,
+//         @ProductDescription,
+//         @Quantity,
+//         @SKU,
+//         @Status,
+//         @IsFeatured,
+//         @CreatedBy,
+//         GETDATE()
+//       )
+//     `;
+
+//     const result = await request.query(query);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Product created successfully",
+//       ProductID: result.recordset[0].ProductID
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error creating product:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to create product",
+//       error: error.message
+//     });
+//   }
+// });
 app.post("/api/products", async (req, res) => {
-  try { 
+  try {
     const {
       ProductCategoryID,
       ProductName,
-      ProductCode,
       ProductDescription,
       Quantity,
       SKU,
       Status,
       IsFeatured,
-      CreatedBy
+      CreatedBy,
+      ProductWeight     // ✅ ADD THIS
     } = req.body;
 
-    // Basic validation
     if (!ProductCategoryID || !ProductName) {
       return res.status(400).json({
         success: false,
@@ -655,49 +967,53 @@ app.post("/api/products", async (req, res) => {
       });
     }
 
-    const request = new sql.Request();
+    const pool = await sql.connect(dbConfig);
 
-    request.input("ProductCategoryID", sql.Int, ProductCategoryID);
-    request.input("ProductName", sql.NVarChar, ProductName);
-    request.input("ProductCode", sql.NVarChar, ProductCode ?? null);
-    request.input("ProductDescription", sql.NVarChar, ProductDescription ?? null);
-    request.input("Quantity", sql.Int, Quantity ?? 0);
-    request.input("SKU", sql.NVarChar, SKU ?? null);
-    request.input("Status", sql.Bit, Status ?? 1);
-    request.input("IsFeatured", sql.Bit, IsFeatured ?? 0);
-    request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
+    // ✅ AUTO GENERATE PRODUCT CODE
+    const ProductCode = "PRD-" + Date.now();
 
-    const query = `
-      INSERT INTO dbo.ProductMaster
-      (
-        ProductCategoryID,
-        ProductName,
-        ProductCode,
-        ProductDescription,
-        Quantity,
-        SKU,
-        Status,
-        IsFeatured,
-        CreatedBy,
-        CreatedDt
-      )
-      OUTPUT INSERTED.ProductID
-      VALUES
-      (
-        @ProductCategoryID,
-        @ProductName,
-        @ProductCode,
-        @ProductDescription,
-        @Quantity,
-        @SKU,
-        @Status,
-        @IsFeatured,
-        @CreatedBy,
-        GETDATE()
-      )
-    `;
-
-    const result = await request.query(query);
+    const result = await pool.request()
+      .input("ProductCategoryID", sql.Int, ProductCategoryID)
+      .input("ProductName", sql.NVarChar(200), ProductName)
+      .input("ProductCode", sql.NVarChar(100), ProductCode)
+      .input("ProductDescription", sql.NVarChar(sql.MAX), ProductDescription ?? "")
+      .input("Quantity", sql.Int, Quantity ?? 0)
+      .input("SKU", sql.NVarChar(100), SKU ?? "")
+      .input("Status", sql.Bit, Status ?? 1)
+      .input("IsFeatured", sql.Bit, IsFeatured ?? 0)
+      .input("CreatedBy", sql.Int, CreatedBy ?? 1)
+      .input("ProductWeight", sql.NVarChar(50), ProductWeight ?? "")  // ✅ ADD THIS
+      .query(`
+        INSERT INTO ProductMaster
+        (
+          ProductCategoryID,
+          ProductName,
+          ProductCode,
+          ProductDescription,
+          Quantity,
+          SKU,
+          Status,
+          IsFeatured,
+          CreatedBy,
+          CreatedDt,
+          ProductWeight       -- ✅ ADD THIS
+        )
+        OUTPUT INSERTED.ProductID
+        VALUES
+        (
+          @ProductCategoryID,
+          @ProductName,
+          @ProductCode,
+          @ProductDescription,
+          @Quantity,
+          @SKU,
+          @Status,
+          @IsFeatured,
+          @CreatedBy,
+          GETDATE(),
+          @ProductWeight      -- ✅ ADD THIS
+        )
+      `);
 
     res.status(201).json({
       success: true,
@@ -706,7 +1022,7 @@ app.post("/api/products", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error creating product:", error);
+    console.error("❌ CREATE PRODUCT ERROR:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create product",
@@ -715,7 +1031,40 @@ app.post("/api/products", async (req, res) => {
   }
 });
 
+
 //product categories
+// app.get("/api/product-categories", async (req, res) => {
+//   try {
+//     const result = await sql.query(`
+//       SELECT
+//         ProductCategoryID,
+//         CategoryName,
+//         CategoryDescription,
+//         Status,
+//         DisplayOrder,
+//         CreatedBy,
+//         CreatedDt,
+//         ModifiedBy,
+//         ModifiedDt
+//       FROM dbo.ProductCategory
+//       ORDER BY DisplayOrder ASC
+//     `);
+
+//     res.status(200).json({
+//       success: true,
+//       count: result.recordset.length,
+//       data: result.recordset
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error fetching product categories:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch product categories",
+//       error: error.message
+//     });
+//   }
+// });
 app.get("/api/product-categories", async (req, res) => {
   try {
     const result = await sql.query(`
@@ -723,19 +1072,13 @@ app.get("/api/product-categories", async (req, res) => {
         ProductCategoryID,
         CategoryName,
         CategoryDescription,
-        Status,
-        DisplayOrder,
-        CreatedBy,
-        CreatedDt,
-        ModifiedBy,
-        ModifiedDt
+        CategoryImage   -- ✅ NEW
       FROM dbo.ProductCategory
       ORDER BY DisplayOrder ASC
     `);
 
     res.status(200).json({
       success: true,
-      count: result.recordset.length,
       data: result.recordset
     });
 
@@ -749,8 +1092,75 @@ app.get("/api/product-categories", async (req, res) => {
   }
 });
 
+
+
 //adding product categories to product category table
-app.post("/api/product-categories", async (req, res) => {
+// app.post("/api/product-categories", async (req, res) => {
+//   try {
+//     const {
+//       CategoryName,
+//       CategoryDescription,
+//       Status,
+//       DisplayOrder,
+//       CreatedBy
+//     } = req.body;
+
+//     // Basic validation
+//     if (!CategoryName) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "CategoryName is required"
+//       });
+//     }
+
+//     const request = new sql.Request();
+
+//     request.input("CategoryName", sql.NVarChar, CategoryName);
+//     request.input("CategoryDescription", sql.NVarChar, CategoryDescription ?? null);
+//     request.input("Status", sql.Bit, Status ?? 1);
+//     request.input("DisplayOrder", sql.Int, DisplayOrder ?? 0);
+//     request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
+
+//     const query = `
+//       INSERT INTO dbo.ProductCategory
+//       (
+//         CategoryName,   
+//         CategoryDescription,
+//         Status,
+//         DisplayOrder,
+//         CreatedBy,
+//         CreatedDt
+//       )
+//       OUTPUT INSERTED.ProductCategoryID
+//       VALUES
+//       (
+//         @CategoryName,
+//         @CategoryDescription,
+//         @Status,
+//         @DisplayOrder,
+//         @CreatedBy,
+//         GETDATE()
+//       )
+//     `;
+
+//     const result = await request.query(query);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Product category created successfully",
+//       ProductCategoryID: result.recordset[0].ProductCategoryID
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error creating product category:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to create product category",
+//       error: error.message
+//     });
+//   }
+// });
+app.post("/api/product-categories", upload.single("CategoryImage"), async (req, res) => {
   try {
     const {
       CategoryName,
@@ -760,7 +1170,6 @@ app.post("/api/product-categories", async (req, res) => {
       CreatedBy
     } = req.body;
 
-    // Basic validation
     if (!CategoryName) {
       return res.status(400).json({
         success: false,
@@ -768,10 +1177,16 @@ app.post("/api/product-categories", async (req, res) => {
       });
     }
 
+    // Image path
+    const imagePath = req.file
+      ? `/uploads/categories/${req.file.filename}`
+      : null;
+
     const request = new sql.Request();
 
     request.input("CategoryName", sql.NVarChar, CategoryName);
     request.input("CategoryDescription", sql.NVarChar, CategoryDescription ?? null);
+    request.input("CategoryImage", sql.NVarChar, imagePath);
     request.input("Status", sql.Bit, Status ?? 1);
     request.input("DisplayOrder", sql.Int, DisplayOrder ?? 0);
     request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
@@ -779,8 +1194,9 @@ app.post("/api/product-categories", async (req, res) => {
     const query = `
       INSERT INTO dbo.ProductCategory
       (
-        CategoryName,   
+        CategoryName,
         CategoryDescription,
+        CategoryImage,
         Status,
         DisplayOrder,
         CreatedBy,
@@ -791,6 +1207,7 @@ app.post("/api/product-categories", async (req, res) => {
       (
         @CategoryName,
         @CategoryDescription,
+        @CategoryImage,
         @Status,
         @DisplayOrder,
         @CreatedBy,
@@ -802,12 +1219,13 @@ app.post("/api/product-categories", async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Product category created successfully",
-      ProductCategoryID: result.recordset[0].ProductCategoryID
+      message: "Category created successfully",
+      ProductCategoryID: result.recordset[0].ProductCategoryID,
+      CategoryImage: imagePath
     });
 
   } catch (error) {
-    console.error("❌ Error creating product category:", error);
+    console.error("❌ Error creating category:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create product category",
@@ -815,6 +1233,7 @@ app.post("/api/product-categories", async (req, res) => {
     });
   }
 });
+
 
 //product prices
 app.get("/api/product-prices", async (req, res) => {
@@ -852,6 +1271,82 @@ app.get("/api/product-prices", async (req, res) => {
 });
 
 //adding product prices to product price master table
+// app.post("/api/product-prices", async (req, res) => {
+//   try {
+//     const {
+//       ProductID,
+//       Price,
+//       DiscountPrice,
+//       ValidFrom,
+//       ValidTo,
+//       CreatedBy
+//     } = req.body;
+
+//     // Basic validation
+//     if (!ProductID || Price === undefined) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "ProductID and Price are required"
+//       });
+//     }
+
+//     if (DiscountPrice && DiscountPrice > Price) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "DiscountPrice cannot be greater than Price"
+//       });
+//     }
+
+//     const request = new sql.Request();
+
+//     request.input("ProductID", sql.Int, ProductID);
+//     request.input("Price", sql.Decimal(10, 2), Price);
+//     request.input("DiscountPrice", sql.Decimal(10, 2), DiscountPrice ?? null);
+//     request.input("ValidFrom", sql.DateTime, ValidFrom ?? new Date());
+//     request.input("ValidTo", sql.DateTime, ValidTo ?? null);
+//     request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
+
+//     const query = `
+//       INSERT INTO Brihati.dbo.ProductPriceMaster
+//       (
+//         ProductID,
+//         Price,
+//         DiscountPrice,
+//         ValidFrom,
+//         ValidTo,
+//         CreatedBy,
+//         CreatedDt
+//       )
+//       OUTPUT INSERTED.PriceID
+//       VALUES
+//       (
+//         @ProductID,
+//         @Price,
+//         @DiscountPrice,
+//         @ValidFrom,
+//         @ValidTo,
+//         @CreatedBy,
+//         GETDATE()
+//       )
+//     `;
+
+//     const result = await request.query(query);
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Product price created successfully",
+//       PriceID: result.recordset[0].PriceID
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error creating product price:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to create product price",
+//       error: error.message
+//     });
+//   }
+// });
 app.post("/api/product-prices", async (req, res) => {
   try {
     const {
@@ -863,7 +1358,6 @@ app.post("/api/product-prices", async (req, res) => {
       CreatedBy
     } = req.body;
 
-    // Basic validation
     if (!ProductID || Price === undefined) {
       return res.status(400).json({
         success: false,
@@ -878,40 +1372,38 @@ app.post("/api/product-prices", async (req, res) => {
       });
     }
 
-    const request = new sql.Request();
+    const pool = await sql.connect(dbConfig);
 
-    request.input("ProductID", sql.Int, ProductID);
-    request.input("Price", sql.Decimal(10, 2), Price);
-    request.input("DiscountPrice", sql.Decimal(10, 2), DiscountPrice ?? null);
-    request.input("ValidFrom", sql.DateTime, ValidFrom ?? new Date());
-    request.input("ValidTo", sql.DateTime, ValidTo ?? null);
-    request.input("CreatedBy", sql.Int, CreatedBy ?? 1);
-
-    const query = `
-      INSERT INTO Brihati.dbo.ProductPriceMaster
-      (
-        ProductID,
-        Price,
-        DiscountPrice,
-        ValidFrom,
-        ValidTo,
-        CreatedBy,
-        CreatedDt
-      )
-      OUTPUT INSERTED.PriceID
-      VALUES
-      (
-        @ProductID,
-        @Price,
-        @DiscountPrice,
-        @ValidFrom,
-        @ValidTo,
-        @CreatedBy,
-        GETDATE()
-      )
-    `;
-
-    const result = await request.query(query);
+    const result = await pool.request()
+      .input("ProductID", sql.Int, ProductID)
+      .input("Price", sql.Decimal(10, 2), Price)
+      .input("DiscountPrice", sql.Decimal(10, 2), DiscountPrice ?? null)
+      .input("ValidFrom", sql.DateTime, ValidFrom ?? new Date())
+      .input("ValidTo", sql.DateTime, ValidTo ?? null)
+      .input("CreatedBy", sql.Int, CreatedBy ?? 1)
+      .query(`
+        INSERT INTO ProductPriceMaster
+        (
+          ProductID,
+          Price,
+          DiscountPrice,
+          ValidFrom,
+          ValidTo,
+          CreatedBy,
+          CreatedDt
+        )
+        OUTPUT INSERTED.PriceID
+        VALUES
+        (
+          @ProductID,
+          @Price,
+          @DiscountPrice,
+          @ValidFrom,
+          @ValidTo,
+          @CreatedBy,
+          GETDATE()
+        )
+      `);
 
     res.status(201).json({
       success: true,
@@ -920,7 +1412,7 @@ app.post("/api/product-prices", async (req, res) => {
     });
 
   } catch (error) {
-    console.error("❌ Error creating product price:", error);
+    console.error("❌ CREATE PRICE ERROR:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create product price",
@@ -928,6 +1420,7 @@ app.post("/api/product-prices", async (req, res) => {
     });
   }
 });
+
 
 //displaying the products based on their categories
 app.get("/api/categories", async (req, res) => {
@@ -981,6 +1474,34 @@ app.get("/api/categories", async (req, res) => {
 
 
 //getting cart items from cart table
+// app.get("/api/products/category/:categoryId", async (req, res) => {
+//   try {
+//     const { categoryId } = req.params;
+
+//     const result = await new sql.Request()
+//       .input("ProductCategoryID", sql.Int, categoryId)
+//       .query(`
+//         SELECT 
+//           pm.ProductID,
+//           pm.ProductName,
+//           pm.ProductDescription,
+//           pm.ProductWeight,
+//           ISNULL(ppm.Price, 0) AS Price,
+//           ISNULL(ppm.DiscountPrice, 0) AS DiscountPrice
+//         FROM ProductMaster pm
+//         LEFT JOIN ProductPriceMaster ppm 
+//           ON pm.ProductID = ppm.ProductID
+//         WHERE pm.ProductCategoryID = @ProductCategoryID
+//           AND pm.Status = 1
+//         ORDER BY pm.CreatedDt DESC
+//       `);
+
+//     res.json(result.recordset);
+//   } catch (err) {
+//     console.error("❌ Products by Category API Error:", err);
+//     res.status(500).json({ message: "Failed to load products" });
+//   }
+// });
 app.get("/api/products/category/:categoryId", async (req, res) => {
   try {
     const { categoryId } = req.params;
@@ -994,16 +1515,25 @@ app.get("/api/products/category/:categoryId", async (req, res) => {
           pm.ProductDescription,
           pm.ProductWeight,
           ISNULL(ppm.Price, 0) AS Price,
-          ISNULL(ppm.DiscountPrice, 0) AS DiscountPrice
+          ISNULL(ppm.DiscountPrice, 0) AS DiscountPrice,
+          a.AttachmentFile AS ProductImage
         FROM ProductMaster pm
+
         LEFT JOIN ProductPriceMaster ppm 
           ON pm.ProductID = ppm.ProductID
+
+        LEFT JOIN Attachments a
+          ON pm.ProductID = a.ProductID
+          AND a.SortOrder = 1   -- ✅ Primary image only
+
         WHERE pm.ProductCategoryID = @ProductCategoryID
           AND pm.Status = 1
+
         ORDER BY pm.CreatedDt DESC
       `);
 
     res.json(result.recordset);
+
   } catch (err) {
     console.error("❌ Products by Category API Error:", err);
     res.status(500).json({ message: "Failed to load products" });
@@ -1012,9 +1542,38 @@ app.get("/api/products/category/:categoryId", async (req, res) => {
 
 
 //to get the cart items based on the userid from the database
+// app.get("/api/cart/:userId", async (req, res) => {
+//   const { userId } = req.params;
+
+//   try {
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request()
+//       .input("UserID", sql.Int, userId)
+//       .query(`
+//         SELECT
+//           c.CartID,
+//           c.ProductID,
+//           c.Quantity,
+//           p.ProductName,
+//           p.ProductWeight,
+//           pp.Price
+//         FROM Cart c
+//         INNER JOIN ProductMaster p ON c.ProductID = p.ProductID
+//         LEFT JOIN ProductPriceMaster pp ON p.ProductID = pp.ProductID
+//         WHERE c.UserID = @UserID
+//       `);
+
+//     res.json(result.recordset);
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
+
 app.get("/api/cart/:userId", async (req, res) => {
   const { userId } = req.params;
-
   try {
     const pool = await sql.connect(dbConfig);
 
@@ -1026,18 +1585,46 @@ app.get("/api/cart/:userId", async (req, res) => {
           c.ProductID,
           c.Quantity,
           p.ProductName,
-          p.ProductWeight,
-          pp.Price
+          p.ProductWeight AS ProductWeight,
+          pp.Price,
+
+          (
+            SELECT TOP 1 AttachmentFile
+            FROM Attachments a
+            WHERE a.ProductID = p.ProductID
+            ORDER BY a.SortOrder ASC
+          ) AS ImageUrl
+
         FROM Cart c
-        INNER JOIN ProductMaster p ON c.ProductID = p.ProductID
-        LEFT JOIN ProductPriceMaster pp ON p.ProductID = pp.ProductID
+        INNER JOIN ProductMaster p 
+          ON c.ProductID = p.ProductID
+
+        LEFT JOIN ProductPriceMaster pp 
+          ON p.ProductID = pp.ProductID
+
         WHERE c.UserID = @UserID
       `);
 
-    res.json(result.recordset);
+    const cartItems = result.recordset.map(item => ({
+      CartID: item.CartID,
+      ProductID: item.ProductID,
+      ProductName: item.ProductName,
+      ProductWeight: item.ProductWeight,
+      Quantity: item.Quantity,
+      Price: item.Price,
+      ImageUrl: item.ImageUrl
+        ? `http://localhost:4000${item.ImageUrl}`
+        : null
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: cartItems.length,
+      data: cartItems
+    });
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ GET CART ERROR:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1237,6 +1824,37 @@ app.post("/api/wishlist", async (req, res) => {
 });
 
 //getting wishlist items from wishlist table
+// app.get("/api/wishlist/:userId", async (req, res) => {
+//   try {
+//     const userId = Number(req.params.userId);
+//     if (!userId) {
+//       return res.status(400).json({ message: "Invalid userId" });
+//     }
+
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request()
+//       .input("UserID", sql.Int, userId)
+//       .query(`
+//         SELECT 
+//           w.WishlistID,
+//           p.ProductID,
+//           p.ProductName,
+//           p.ProductDescription,
+//           p.ProductWeight,            
+//           pm.Price
+//         FROM Wishlist w
+//         INNER JOIN ProductMaster p ON p.ProductID = w.ProductID
+//         LEFT JOIN ProductPriceMaster pm ON pm.ProductID = p.ProductID
+//         WHERE w.UserID = @UserID
+//       `);
+
+//     res.json(result.recordset);
+//   } catch (err) {
+//     console.error("❌ Wishlist fetch error:", err);
+//     res.status(500).json({ message: "Failed to load wishlist" });
+//   }
+// });
 app.get("/api/wishlist/:userId", async (req, res) => {
   try {
     const userId = Number(req.params.userId);
@@ -1254,16 +1872,44 @@ app.get("/api/wishlist/:userId", async (req, res) => {
           p.ProductID,
           p.ProductName,
           p.ProductDescription,
-          p.ProductWeight,
-                       
-          pm.Price
+          p.ProductWeight AS ProductWeight,
+          pm.Price,
+
+          (
+            SELECT TOP 1 AttachmentFile
+            FROM Attachments a
+            WHERE a.ProductID = p.ProductID
+            ORDER BY a.SortOrder ASC
+          ) AS ImageUrl
+
         FROM Wishlist w
-        INNER JOIN ProductMaster p ON p.ProductID = w.ProductID
-        LEFT JOIN ProductPriceMaster pm ON pm.ProductID = p.ProductID
+        INNER JOIN ProductMaster p 
+          ON p.ProductID = w.ProductID
+
+        LEFT JOIN ProductPriceMaster pm 
+          ON pm.ProductID = p.ProductID
+
         WHERE w.UserID = @UserID
       `);
 
-    res.json(result.recordset);
+    const wishlistItems = result.recordset.map(item => ({
+      WishlistID: item.WishlistID,
+      ProductID: item.ProductID,
+      ProductName: item.ProductName,
+      ProductDescription: item.ProductDescription,
+      ProductWeight: item.ProductWeight,
+      Price: item.Price,
+      ImageUrl: item.ImageUrl
+        ? `http://localhost:4000${item.ImageUrl}`
+        : null
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: wishlistItems.length,
+      data: wishlistItems
+    });
+
   } catch (err) {
     console.error("❌ Wishlist fetch error:", err);
     res.status(500).json({ message: "Failed to load wishlist" });
@@ -1519,7 +2165,253 @@ const SALT_INDEX = "1";
 // });
 
 //getting the order details from database to post it in payment success page
+// app.post("/api/order/create", async (req, res) => {
+//   try {
+//     const {
+//       userId,
+//       cartItems,
+//       totalAmount,
+//       taxAmount,
+//       paymentMode,
+//       shippingAddress : selectedAddress
+//     } = req.body;
+
+//     if (!cartItems || cartItems.length === 0) {
+//       return res.status(400).json({ message: "Cart empty" });
+//     }
+
+//     /* =========================
+//        1️⃣ CREATE ORDER MASTER
+//     ========================= */
+
+//     const orderResult = await new sql.Request()
+//       .input("UserID", sql.Int, userId)
+//       .input("TotalAmount", sql.Decimal(10, 2), totalAmount)
+//       .input("TaxAmount", sql.Decimal(10, 2), taxAmount)
+//       .input("PaymentMode", sql.VarChar(20), paymentMode || "DUMMY")
+//       .input("PaymentStatus", sql.VarChar(20), "SUCCESS")
+//       .input("OrderStatus", sql.VarChar(20), "CONFIRMED")
+//       .input("CreatedBy", sql.Int, userId)
+//       .query(`
+//         INSERT INTO OrderMaster
+//         (
+//           UserID,
+//           OrderDate,
+//           TotalAmount,
+//           TaxAmount,
+//           PaymentMode,
+//           PaymentStatus,
+//           OrderStatus,
+//           CreatedBy,
+//           CreatedDt
+//         )
+//         OUTPUT INSERTED.OrderID
+//         VALUES
+//         (
+//           @UserID,
+//           GETDATE(),
+//           @TotalAmount,
+//           @TaxAmount,
+//           @PaymentMode,
+//           @PaymentStatus,
+//           @OrderStatus,
+//           @CreatedBy,
+//           GETDATE()
+//         )
+//       `);
+
+//     const orderId = orderResult.recordset[0].OrderID;
+
+//     /* =========================
+//        2️⃣ INSERT ORDER DETAILS
+//     ========================= */
+
+//     for (const item of cartItems) {
+//       const unitPrice = item.unitPrice;
+//       const quantity = item.quantity;
+//       const totalPrice = unitPrice * quantity;
+
+//       await new sql.Request()
+//         .input("OrderID", sql.Int, orderId)
+//         .input("ProductID", sql.Int, item.productId)
+//         .input("Quantity", sql.Int, quantity)
+//         .input("UnitPrice", sql.Decimal(10, 2), unitPrice)
+//         .input("TotalPrice", sql.Decimal(10, 2), totalPrice)
+//         .input("CreatedBy", sql.Int, userId)
+//         .query(`
+//           INSERT INTO OrderDetails
+//           (OrderID, ProductID, Quantity, UnitPrice, TotalPrice, CreatedBy, CreatedDt)
+//           VALUES
+//           (@OrderID, @ProductID, @Quantity, @UnitPrice, @TotalPrice, @CreatedBy, GETDATE())
+//         `);
+//     }
+
+//     /* =========================
+//        3️⃣ AUTO CREATE DELIVERY
+//     ========================= */
+
+//     const expectedDate = new Date();
+//     expectedDate.setDate(expectedDate.getDate() + 5);
+
+//     const fullAddress = shippingAddress
+//   ? `
+//      ${shippingAddress.city || ""},
+//      ${shippingAddress.state || ""} - ${shippingAddress.pincode || ""}`
+//   : "Customer Address";
+
+//     await new sql.Request()
+//       .input("OrderID", sql.Int, orderId)
+//       .input("UserID", sql.Int, userId)
+//       .input("ShippingMode", sql.VarChar(50), "STANDARD")
+//       .input("FromLocation", sql.VarChar(100), "Main Warehouse")
+//       .input("ToLocation", sql.VarChar(100),  fullAddress)
+//       .input("DeliveryStatus", sql.VarChar(50), "ORDER_CONFIRMED")
+//       .input("ExpectedDeliveryDate", sql.DateTime, expectedDate)
+//       .input("CreatedBy", sql.Int, userId)
+//       .query(`
+//         INSERT INTO Delivery
+//         (
+//           OrderID,
+//           UserID,
+//           ShippingMode,
+//           FromLocation,
+//           ToLocation,
+//           DeliveryStatus,
+//           ExpectedDeliveryDate,
+//           CreatedBy,
+//           CreatedDt
+//         )
+//         VALUES
+//         (
+//           @OrderID,
+//           @UserID,
+//           @ShippingMode,
+//           @FromLocation,
+//           @ToLocation,
+//           @DeliveryStatus,
+//           @ExpectedDeliveryDate,
+//           @CreatedBy,
+//           GETDATE()
+//         )
+//       `);
+
+//     /* =========================
+//        4️⃣ AUTO GENERATE INVOICE
+//     ========================= */
+
+//      /* =========================
+//    AUTO GENERATE INVOICE
+// ========================= */
+
+// await generateInvoice({
+//   orderId,
+//   userId,
+//   shippingAddress: `${shippingAddress?.addressLine || ""}, ${shippingAddress?.city || ""}`,
+//   items: cartItems.map(item => ({
+//     name: item.productName || `Product ${item.productId}`,
+//     quantity: item.quantity,
+//     unitPrice: item.unitPrice,
+//     total: item.unitPrice * item.quantity
+//   })),
+//   subtotal: totalAmount - taxAmount,
+//   tax: taxAmount,
+//   totalAmount
+// });
+
+
+//     /* =========================
+//        5️⃣ RESPONSE
+//     ========================= */
+
+//     res.json({
+//       success: true,
+//       orderId,
+//       invoiceUrl: `http://localhost:4000/api/order/${orderId}/invoice`,
+//       message: "Order + Delivery + Invoice created successfully"
+//     });
+
+//   } catch (err) {
+//     console.error("❌ ORDER CREATE ERROR:", err);
+//     res.status(500).json({
+//       message: "Order creation failed",
+//       error: err.message
+//     });
+//   }
+// });
+
+// app.get("/api/order/:orderId", async (req, res) => {
+//   try {
+//     const { orderId } = req.params;
+
+//     // 1️⃣ Get order master
+//     const orderResult = await new sql.Request()
+//       .input("OrderID", sql.Int, orderId)
+//       .query(`
+//         SELECT 
+//           o.OrderID,
+//           o.OrderDate,
+//           o.TotalAmount,
+//           o.TaxAmount,
+//           o.PaymentMode,
+//           o.PaymentStatus,
+//           o.OrderStatus
+//         FROM OrderMaster o
+//         WHERE o.OrderID = @OrderID
+//       `);
+
+//     if (orderResult.recordset.length === 0) {
+//       return res.status(404).json({ message: "Order not found" });
+//     }
+
+//     const order = orderResult.recordset[0];
+
+//     // 2️⃣ Get order items
+//     const itemsResult = await new sql.Request()
+//       .input("OrderID", sql.Int, orderId)
+//       .query(`
+//         SELECT 
+//           p.ProductName,
+//           od.Quantity,
+//           od.UnitPrice,
+//           od.TotalPrice
+//         FROM OrderDetails od
+//         JOIN ProductMaster p ON od.ProductID = p.ProductID
+//         WHERE od.OrderID = @OrderID
+//       `);
+
+//     const items = itemsResult.recordset.map(item => ({
+//       productName: item.ProductName,
+//       weight: "200gms", // or from DB
+//       qty: item.Quantity,
+//       price: item.TotalPrice,
+//       // imageUrl: item.ProductImage || "https://via.placeholder.com/60"
+//     }));
+
+//     // 3️⃣ Response
+//     res.json({
+//       orderId: order.OrderID,
+//       transactionDate: new Date(order.OrderDate).toDateString(),
+//       paymentMethod: order.PaymentMode,
+//       shippingMethod: "Shiprocket",
+//       subtotal: order.TotalAmount,
+//       gst: order.TaxAmount,
+//       shipping: 40,
+//       total: order.TotalAmount + order.TaxAmount + 40,
+//       items
+//     });
+
+//   } catch (err) {
+//     console.error("❌ ORDER FETCH ERROR:", err);
+//     res.status(500).json({
+//       message: "Failed to fetch order",
+//       error: err.message
+//     });
+//   }
+// });
+
 app.post("/api/order/create", async (req, res) => {
+  const transaction = new sql.Transaction();
+
   try {
     const {
       userId,
@@ -1530,19 +2422,34 @@ app.post("/api/order/create", async (req, res) => {
       shippingAddress
     } = req.body;
 
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(400).json({ message: "Cart empty" });
+    if (!userId) {
+      return res.status(400).json({ message: "UserId is required" });
     }
+
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({ message: "Cart is empty" });
+    }
+
+    if (!shippingAddress) {
+      return res.status(400).json({ message: "Shipping address required" });
+    }
+
+    // ==============================
+    // BEGIN TRANSACTION
+    // ==============================
+    await transaction.begin();
+
+    const request = new sql.Request(transaction);
 
     /* =========================
        1️⃣ CREATE ORDER MASTER
     ========================= */
 
-    const orderResult = await new sql.Request()
+    const orderResult = await request
       .input("UserID", sql.Int, userId)
       .input("TotalAmount", sql.Decimal(10, 2), totalAmount)
       .input("TaxAmount", sql.Decimal(10, 2), taxAmount)
-      .input("PaymentMode", sql.VarChar(20), paymentMode || "DUMMY")
+      .input("PaymentMode", sql.VarChar(20), paymentMode || "COD")
       .input("PaymentStatus", sql.VarChar(20), "SUCCESS")
       .input("OrderStatus", sql.VarChar(20), "CONFIRMED")
       .input("CreatedBy", sql.Int, userId)
@@ -1585,7 +2492,7 @@ app.post("/api/order/create", async (req, res) => {
       const quantity = item.quantity;
       const totalPrice = unitPrice * quantity;
 
-      await new sql.Request()
+      await new sql.Request(transaction)
         .input("OrderID", sql.Int, orderId)
         .input("ProductID", sql.Int, item.productId)
         .input("Quantity", sql.Int, quantity)
@@ -1601,18 +2508,32 @@ app.post("/api/order/create", async (req, res) => {
     }
 
     /* =========================
-       3️⃣ AUTO CREATE DELIVERY
+       3️⃣ CREATE DELIVERY
     ========================= */
 
     const expectedDate = new Date();
     expectedDate.setDate(expectedDate.getDate() + 5);
 
-    await new sql.Request()
+    const cityAddress = `
+${shippingAddress.city},
+${shippingAddress.state} - ${shippingAddress.pincode}
+`;
+       const fullAddress = `
+${shippingAddress.name}
+Ph: ${shippingAddress.mobile}
+No ${shippingAddress.flat},
+${shippingAddress.street},
+${shippingAddress.landmark || ""}
+${shippingAddress.city},
+${shippingAddress.state} - ${shippingAddress.pincode}
+`;
+
+    await new sql.Request(transaction)
       .input("OrderID", sql.Int, orderId)
       .input("UserID", sql.Int, userId)
       .input("ShippingMode", sql.VarChar(50), "STANDARD")
       .input("FromLocation", sql.VarChar(100), "Main Warehouse")
-      .input("ToLocation", sql.VarChar(100), shippingAddress?.city || "Customer Address")
+      .input("ToLocation", sql.NVarChar(500), cityAddress)
       .input("DeliveryStatus", sql.VarChar(50), "ORDER_CONFIRMED")
       .input("ExpectedDeliveryDate", sql.DateTime, expectedDate)
       .input("CreatedBy", sql.Int, userId)
@@ -1644,32 +2565,28 @@ app.post("/api/order/create", async (req, res) => {
       `);
 
     /* =========================
-       4️⃣ AUTO GENERATE INVOICE
+       4️⃣ GENERATE INVOICE
     ========================= */
 
-     /* =========================
-   AUTO GENERATE INVOICE
-========================= */
+    await generateInvoice({
+      orderId,
+      userId,
+      shippingAddress: fullAddress,
+      items: cartItems.map(item => ({
+        name: item.productName || `Product ${item.productId}`,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        total: item.unitPrice * item.quantity
+      })),
+      subtotal: totalAmount - taxAmount,
+      tax: taxAmount,
+      totalAmount
+    });
 
-await generateInvoice({
-  orderId,
-  userId,
-  shippingAddress: `${shippingAddress?.addressLine || ""}, ${shippingAddress?.city || ""}`,
-  items: cartItems.map(item => ({
-    name: item.productName || `Product ${item.productId}`,
-    quantity: item.quantity,
-    unitPrice: item.unitPrice,
-    total: item.unitPrice * item.quantity
-  })),
-  subtotal: totalAmount - taxAmount,
-  tax: taxAmount,
-  totalAmount
-});
-
-
-    /* =========================
-       5️⃣ RESPONSE
-    ========================= */
+    // ==============================
+    // COMMIT TRANSACTION
+    // ==============================
+    await transaction.commit();
 
     res.json({
       success: true,
@@ -1679,7 +2596,16 @@ await generateInvoice({
     });
 
   } catch (err) {
+
+    // ==============================
+    // ROLLBACK IF ERROR
+    // ==============================
+    if (transaction) {
+      await transaction.rollback();
+    }
+
     console.error("❌ ORDER CREATE ERROR:", err);
+
     res.status(500).json({
       message: "Order creation failed",
       error: err.message
@@ -1691,8 +2617,10 @@ app.get("/api/order/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // 1️⃣ Get order master
-    const orderResult = await new sql.Request()
+    const pool = await sql.connect(dbConfig);
+
+    /* 1️⃣ ORDER MASTER */
+    const orderResult = await pool.request()
       .input("OrderID", sql.Int, orderId)
       .query(`
         SELECT 
@@ -1713,29 +2641,41 @@ app.get("/api/order/:orderId", async (req, res) => {
 
     const order = orderResult.recordset[0];
 
-    // 2️⃣ Get order items
-    const itemsResult = await new sql.Request()
+    /* 2️⃣ ORDER ITEMS WITH IMAGE */
+    const itemsResult = await pool.request()
       .input("OrderID", sql.Int, orderId)
       .query(`
         SELECT 
           p.ProductName,
+          p.ProductWeight AS ProductWeight,
           od.Quantity,
           od.UnitPrice,
-          od.TotalPrice
+          od.TotalPrice,
+
+          (
+            SELECT TOP 1 AttachmentFile
+            FROM Attachments a
+            WHERE a.ProductID = p.ProductID
+            ORDER BY a.SortOrder ASC
+          ) AS ImageUrl
+
         FROM OrderDetails od
-        JOIN ProductMaster p ON od.ProductID = p.ProductID
+        JOIN ProductMaster p 
+          ON od.ProductID = p.ProductID
         WHERE od.OrderID = @OrderID
       `);
 
     const items = itemsResult.recordset.map(item => ({
       productName: item.ProductName,
-      weight: "200gms", // or from DB
+      weight: item.ProductWeight || "",
       qty: item.Quantity,
       price: item.TotalPrice,
-      // imageUrl: item.ProductImage || "https://via.placeholder.com/60"
+      imageUrl: item.ImageUrl
+        ? `http://localhost:4000${item.ImageUrl}`
+        : null
     }));
 
-    // 3️⃣ Response
+    /* 3️⃣ FINAL RESPONSE */
     res.json({
       orderId: order.OrderID,
       transactionDate: new Date(order.OrderDate).toDateString(),
@@ -1757,12 +2697,75 @@ app.get("/api/order/:orderId", async (req, res) => {
   }
 });
 
-//getting the order details to post it in my orders page
+
+
+//getting the order details to post it in myorders page
+// app.get("/api/orders/user/:userId", async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     // Order master
+//     const ordersResult = await new sql.Request()
+//       .input("UserID", sql.Int, userId)
+//       .query(`
+//         SELECT 
+//           o.OrderID,
+//           o.OrderDate,
+//           o.OrderStatus,
+//           o.PaymentStatus
+//         FROM OrderMaster o
+//         WHERE o.UserID = @UserID
+//         ORDER BY o.OrderDate DESC
+//       `);
+
+//     const orders = [];
+
+//     for (let order of ordersResult.recordset) {
+//       // order items
+//       const itemsResult = await new sql.Request()
+//         .input("OrderID", sql.Int, order.OrderID)
+//         .query(`
+//           SELECT 
+//             p.ProductName,
+//             od.Quantity,
+//             od.UnitPrice,
+//             od.TotalPrice,
+            
+//           FROM OrderDetails od
+//           JOIN ProductMaster p ON od.ProductID = p.ProductID
+//           WHERE od.OrderID = @OrderID
+//         `);
+
+//       orders.push({
+//         orderId: order.OrderID,
+//         orderDate: new Date(order.OrderDate).toDateString(),
+//         orderStatus: order.OrderStatus,
+//         paymentStatus: order.PaymentStatus,
+//         items: itemsResult.recordset.map(i => ({
+//           productName: i.ProductName,
+//           qty: i.Quantity,
+//           price: i.TotalPrice,
+//           weight: "200gms",
+//           imageUrl: "https://via.placeholder.com/80"
+//         }))
+//       });
+//     }
+
+//     res.json({ success: true, data: orders });
+
+//   } catch (err) {
+//     console.error("❌ USER ORDERS ERROR:", err);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch orders"
+//     });
+//   }
+// });
+
 app.get("/api/orders/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Order master
     const ordersResult = await new sql.Request()
       .input("UserID", sql.Int, userId)
       .query(`
@@ -1779,15 +2782,24 @@ app.get("/api/orders/user/:userId", async (req, res) => {
     const orders = [];
 
     for (let order of ordersResult.recordset) {
-      // order items
+
       const itemsResult = await new sql.Request()
         .input("OrderID", sql.Int, order.OrderID)
         .query(`
           SELECT 
             p.ProductName,
+            p.ProductWeight,
             od.Quantity,
             od.UnitPrice,
-            od.TotalPrice
+            od.TotalPrice,
+
+            (
+              SELECT TOP 1 AttachmentFile
+              FROM Attachments a
+              WHERE a.ProductID = p.ProductID
+              ORDER BY a.SortOrder ASC
+            ) AS ImageUrl
+
           FROM OrderDetails od
           JOIN ProductMaster p ON od.ProductID = p.ProductID
           WHERE od.OrderID = @OrderID
@@ -1802,8 +2814,10 @@ app.get("/api/orders/user/:userId", async (req, res) => {
           productName: i.ProductName,
           qty: i.Quantity,
           price: i.TotalPrice,
-          weight: "200gms",
-          imageUrl: "https://via.placeholder.com/80"
+          weight: i.ProductWeight || "",
+          imageUrl: i.ImageUrl
+            ? `http://localhost:4000${i.ImageUrl}`
+            : "https://via.placeholder.com/80"
         }))
       });
     }
@@ -2247,5 +3261,733 @@ app.post("/api/warehouse", async (req, res) => {
       message: "Failed to add warehouse stock",
       error: error.message
     });
+  }
+});
+
+
+// ============================================
+// GET API - Get Attachments by ProductID
+// ============================================
+
+// to get attachments(images) from db to  
+app.get("/api/attachments/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const result = await sql.query`
+      SELECT AttachmentID, ProductID, AttachmentName, AttachmentFile
+      FROM Attachments
+      WHERE ProductID = ${productId}
+      ORDER BY Sortorder
+    `;
+
+    res.json(result.recordset);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error fetching attachments" });
+  }
+});
+
+//to post the images related to productid in to the db 
+// app.post(
+//   "/api/attachments/:productId",
+//   upload.array("images", 4), // ✅ max 4 images
+//   async (req, res) => {
+//     try {
+//       const { productId } = req.params;
+
+//       if (!req.files || req.files.length === 0) {
+//         return res.status(400).json({
+//           success: false,
+//           message: "No images uploaded"
+//         });
+//       }
+
+//       const pool = await sql.connect(dbConfig);
+
+//       for (let i = 0; i < req.files.length; i++) {
+//         const file = req.files[i];
+
+//         await pool.request()
+//           .input("ProductID", sql.Int, productId)
+//           .input("AttachmentName", sql.NVarChar(255), file.filename)
+//           .input("AttachmentFile", sql.NVarChar(500), `/uploads/${file.filename}`)
+//           .input("SortOrder", sql.Int, i + 1) // ✅ START FROM 1
+//           .input("CreatedBy", sql.Int, 1)
+//           .query(`
+//             INSERT INTO dbo.Attachments
+//             (
+//               ProductID,
+//               Section,
+//               SortOrder,
+//               AttachmentName,
+//               AttachmentFile,
+//               CreatedBy,
+//               CreatedDt
+//             )
+//             VALUES
+//             (
+//               @ProductID,
+//               'PRODUCT',
+//               @SortOrder,
+//               @AttachmentName,
+//               @AttachmentFile,
+//               @CreatedBy,
+//               GETDATE()
+//             )
+//           `);
+//       }
+
+//       res.status(201).json({
+//         success: true,
+//         message: "Images uploaded successfully"
+//       });
+
+//     } catch (error) {
+//       res.status(500).json({
+//         success: false,
+//         message: "Attachment upload failed",
+//         error: error.message
+//       });
+//     }
+//   }
+// );
+app.post(
+  "/api/attachments/:productId",
+  productUpload.array("images", 4),
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No images uploaded"
+        });
+      }
+
+      const pool = await sql.connect(dbConfig);
+
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+
+        await pool.request()
+          .input("ProductID", sql.Int, productId)
+          .input("AttachmentName", sql.NVarChar(255), file.filename)
+          .input("AttachmentFile", sql.NVarChar(500), `/uploads/products/${file.filename}`)
+          .input("SortOrder", sql.Int, i + 1)
+          .input("CreatedBy", sql.Int, 1)
+          .query(`
+            INSERT INTO dbo.Attachments
+            (
+              ProductID,
+              Section,
+              SortOrder,
+              AttachmentName,
+              AttachmentFile,
+              CreatedBy,
+              CreatedDt
+            )
+            VALUES
+            (
+              @ProductID,
+              'PRODUCT',
+              @SortOrder,
+              @AttachmentName,
+              @AttachmentFile,
+              @CreatedBy,
+              GETDATE()
+            )
+          `);
+      }
+
+      res.status(201).json({
+        success: true,
+        message: "Images uploaded successfully"
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Attachment upload failed",
+        error: error.message
+      });
+    }
+  }
+);
+
+
+app.get("/api/attachments/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const result = await sql.query(`
+      SELECT AttachmentID,
+             ProductID,
+             AttachmentFile,
+             SortOrder
+      FROM dbo.Attachments
+      WHERE ProductID = ${productId}
+      ORDER BY SortOrder ASC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (error) {
+    console.error("❌ Fetch attachments failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch attachments",
+      error: error.message
+    });
+  }
+});
+
+
+//admin back office apis 
+//to get product categories from the db into admin/category 
+app.get("/api/admin/product-categories", async (req, res) => {
+  try {
+    const result = await sql.query(`
+      SELECT
+        ProductCategoryID,
+        CategoryName,
+        CategoryDescription,
+        CategoryImage,
+        Status,              -- ✅ Include Status
+        DisplayOrder
+      FROM dbo.ProductCategory
+      ORDER BY DisplayOrder ASC
+    `);
+
+    res.status(200).json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch categories",
+      error: error.message
+    });
+  }
+});
+
+//to get the products from db into admin/products
+app.get("/api/admin-products", async (req, res) => {
+  try {
+    const result = await sql.query(`
+      SELECT 
+        p.ProductID,
+        p.ProductName,
+        p.ProductCode,
+        p.ProductWeight,
+        p.Quantity,
+        p.Status,
+        pr.Price,
+        pr.DiscountPrice,
+        a.AttachmentFile AS ProductImage
+      FROM dbo.ProductMaster p
+
+      LEFT JOIN dbo.ProductPriceMaster pr 
+        ON p.ProductID = pr.ProductID
+
+      LEFT JOIN dbo.Attachments a
+        ON p.ProductID = a.ProductID
+        AND a.SortOrder = 1   -- ✅ ONLY PRIMARY IMAGE
+
+      ORDER BY p.ProductID DESC
+    `);
+
+    res.status(200).json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch products",
+      error: error.message
+    });
+  }
+});
+
+
+// ==============================
+// ADMIN - GET ALL ORDERS WITH DELIVERY
+// ==============================
+app.get("/api/admin/orders", async (req, res) => {
+  try {
+    const ordersResult = await new sql.Request().query(`
+      SELECT 
+        o.OrderID,
+        o.UserID,
+        u.FirstName,
+        o.OrderDate,
+        o.TotalAmount,
+        o.PaymentMode,
+        o.PaymentStatus,
+        o.OrderStatus,
+        d.ExpectedDeliveryDate,
+        d.DeliveryStatus
+      FROM OrderMaster o
+      LEFT JOIN Delivery d ON o.OrderID = d.OrderID
+      LEFT JOIN UserMaster u ON o.UserID = u.UserID  
+      ORDER BY o.OrderDate DESC
+    `);
+
+    const orders = [];
+
+    for (let order of ordersResult.recordset) {
+      const itemsResult = await new sql.Request()
+        .input("OrderID", sql.Int, order.OrderID)
+        .query(`
+          SELECT 
+            p.ProductName,
+            od.Quantity,
+             p.ProductWeight,
+            od.UnitPrice,
+            od.TotalPrice
+          FROM OrderDetails od
+          JOIN ProductMaster p ON od.ProductID = p.ProductID
+          WHERE od.OrderID = @OrderID
+        `);
+
+      orders.push({
+        orderId: order.OrderID,
+        userId: order.UserID,
+        FirstName:order.FirstName,
+        orderDate: new Date(order.OrderDate).toLocaleDateString(),
+        expectedDelivery: order.ExpectedDeliveryDate
+          ? new Date(order.ExpectedDeliveryDate).toLocaleDateString()
+          : "-",
+        deliveryStatus: order.DeliveryStatus,
+        orderStatus: order.OrderStatus,
+        paymentStatus: order.PaymentStatus,
+        paymentMode: order.PaymentMode,
+        totalAmount: order.TotalAmount,
+        items: itemsResult.recordset
+      });
+    }
+
+    res.json({ success: true, data: orders });
+
+  } catch (err) {
+    console.error("❌ ADMIN ORDER ERROR:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
+// app.get("/api/admin/customers", async (req, res) => {
+//   try {
+//     const result = await new sql.Request().query(`
+//       SELECT 
+//         u.UserID,
+//         u.FirstName,
+//         u.LastName,
+//         u.Email,
+//         u.ContactNo,
+//         u.Status,
+//         u.CreatedDt,
+//         o.OrderDate,
+//       FROM UserMaster u
+//       LEFT JOIN (
+//           SELECT UserID, 
+//                  MAX(OrderDate) AS OrderDate,
+//           FROM OrderMaster
+//           GROUP BY UserID
+//       ) o ON u.UserID = o.UserID
+//       WHERE u.RoleID = 5
+//       ORDER BY o.CreatedDt DESC
+//     `);
+
+//     res.json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (err) {
+//     console.error("❌ CUSTOMER API ERROR:", err);
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+app.get("/api/admin/customers", async (req, res) => {
+  try {
+    const result = await new sql.Request().query(`
+      SELECT 
+        u.UserID,
+        u.FirstName,
+        u.LastName,
+        u.Email,
+        u.ContactNo,
+        u.Status,
+        u.CreatedDt ,
+        o.OrderDate
+      FROM UserMaster u
+      LEFT JOIN (
+          SELECT UserID, 
+                 MAX(OrderDate) AS OrderDate
+          FROM OrderMaster
+          GROUP BY UserID
+      ) o ON u.UserID = o.UserID
+      WHERE u.RoleID = 5
+      ORDER BY u.CreatedDt DESC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("❌ CUSTOMER API ERROR:", err);
+    res.status(500).json({ success: false });
+  }
+});
+
+
+// app.get("/api/cart/recommendations/:userId", async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     const result = await new sql.Request()
+//       .input("UserID", sql.Int, userId)
+//       .query(`
+//         SELECT 
+//           pm.ProductID,
+//           pm.ProductName,
+//           pm.ProductDescription,
+//           pm.ProductWeight,
+//           ISNULL(ppm.Price, 0) AS Price,
+//           ISNULL(ppm.DiscountPrice, 0) AS DiscountPrice,
+//           a.AttachmentFile AS ProductImage
+//         FROM Cart c
+
+//         INNER JOIN ProductMaster cartPm
+//           ON c.ProductID = cartPm.ProductID
+
+//         INNER JOIN ProductMaster pm
+//           ON pm.ProductCategoryID = cartPm.ProductCategoryID
+
+//         LEFT JOIN ProductPriceMaster ppm
+//           ON pm.ProductID = ppm.ProductID
+
+//         LEFT JOIN Attachments a
+//           ON pm.ProductID = a.ProductID
+//           AND a.SortOrder = 1
+
+//         WHERE c.UserID = @UserID
+//           AND pm.ProductID NOT IN (
+//               SELECT ProductID 
+//               FROM Cart
+//               WHERE UserID = @UserID
+//           )
+//           AND pm.Status = 1
+
+//         ORDER BY pm.CreatedDt DESC
+//       `);
+
+//     res.json(result.recordset);
+
+//   } catch (err) {
+//     console.error("❌ Recommendation API Error:", err);
+//     res.status(500).json({
+//       message: "Failed to load recommendations",
+//       error: err.message
+//     });
+//   }
+// });
+
+app.get("/api/cart/recommendations/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await new sql.Request()
+      .input("UserID", sql.Int, userId)
+      .query(`
+        SELECT DISTINCT
+            pm.ProductID,
+            pm.ProductName,
+            pm.ProductDescription,
+            pm.ProductWeight,
+            ISNULL(ppm.Price, 0) AS Price,
+            ISNULL(ppm.DiscountPrice, 0) AS DiscountPrice,
+            img.AttachmentFile AS ProductImage
+
+        FROM Cart c
+
+        INNER JOIN ProductMaster cartPm
+            ON c.ProductID = cartPm.ProductID
+
+        INNER JOIN ProductMaster pm
+            ON pm.ProductCategoryID = cartPm.ProductCategoryID
+            AND pm.Status = 1
+
+        LEFT JOIN ProductPriceMaster ppm
+            ON pm.ProductID = ppm.ProductID
+
+        OUTER APPLY (
+            SELECT TOP 1 AttachmentFile
+            FROM Attachments
+            WHERE ProductID = pm.ProductID
+            ORDER BY SortOrder ASC
+        ) img
+
+        WHERE c.UserID = @UserID
+          AND pm.ProductID NOT IN (
+              SELECT ProductID 
+              FROM Cart
+              WHERE UserID = @UserID
+          )
+
+        ORDER BY pm.ProductID DESC
+      `);
+
+    res.json(result.recordset);
+
+  } catch (err) {
+    console.error("❌ Recommendation API Error:", err);
+    res.status(500).json({
+      message: "Failed to load recommendations",
+      error: err.message
+    });
+  }
+});
+
+// ADD NEW ADDRESS
+app.get("/api/address/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request()
+      .input("UserID", sql.Int, userId)
+      .query(`
+        SELECT 
+          AddressID,
+          UserID,
+          FullName,
+          MobileNumber,
+          AddressLine1,
+          AddressLine2,
+          Landmark,
+          City,
+          State,
+          Country,
+          Pincode,
+          AddressType,
+          IsDefault
+        FROM Address
+        WHERE UserID = @UserID
+        ORDER BY IsDefault DESC, CreatedDate DESC
+      `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+app.post("/api/address", async (req, res) => {
+  try {
+    const {
+      userId,
+      name,
+      mobile,
+      flat,
+      street,
+      landmark,
+      city,
+      state,
+      pincode,
+      type,
+      isDefault
+    } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    // Check if first address
+    const countResult = await pool.request()
+      .input("UserID", sql.Int, userId)
+      .query(`SELECT COUNT(*) as total FROM Address WHERE UserID = @UserID`);
+
+    const isFirstAddress = countResult.recordset[0].total === 0;
+
+    // If setting default → remove other defaults
+    if (isDefault || isFirstAddress) {
+      await pool.request()
+        .input("UserID", sql.Int, userId)
+        .query(`
+          UPDATE Address
+          SET IsDefault = 0
+          WHERE UserID = @UserID
+        `);
+    }
+
+    await pool.request()
+      .input("UserID", sql.Int, userId)
+      .input("FullName", sql.NVarChar, name)
+      .input("MobileNumber", sql.NVarChar, mobile)
+      .input("AddressLine1", sql.NVarChar, flat)
+      .input("AddressLine2", sql.NVarChar, street)
+      .input("Landmark", sql.NVarChar, landmark)
+      .input("City", sql.NVarChar, city)
+      .input("State", sql.NVarChar, state)
+      .input("Country", sql.NVarChar, "India")
+      .input("Pincode", sql.NVarChar, pincode)
+      .input("AddressType", sql.NVarChar, type)
+      .input("IsDefault", sql.Bit, isFirstAddress ? 1 : (isDefault ? 1 : 0))
+      .query(`
+        INSERT INTO Address (
+          UserID, FullName, MobileNumber,
+          AddressLine1, AddressLine2, Landmark,
+          City, State, Country, Pincode,
+          AddressType, IsDefault,
+          CreatedDate, UpdatedDate
+        )
+        VALUES (
+          @UserID, @FullName, @MobileNumber,
+          @AddressLine1, @AddressLine2, @Landmark,
+          @City, @State, @Country, @Pincode,
+          @AddressType, @IsDefault,
+          GETDATE(), GETDATE()
+        )
+      `);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+app.put("/api/address/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      mobile,
+      flat,
+      street,
+      landmark,
+      city,
+      state,
+      pincode,
+      type,
+      isDefault,
+      userId
+    } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    if (isDefault) {
+      await pool.request()
+        .input("UserID", sql.Int, userId)
+        .query(`
+          UPDATE Address
+          SET IsDefault = 0
+          WHERE UserID = @UserID
+        `);
+    }
+
+    await pool.request()
+      .input("AddressID", sql.Int, id)
+      .input("FullName", sql.NVarChar, name)
+      .input("MobileNumber", sql.NVarChar, mobile)
+      .input("AddressLine1", sql.NVarChar, flat)
+      .input("AddressLine2", sql.NVarChar, street)
+      .input("Landmark", sql.NVarChar, landmark)
+      .input("City", sql.NVarChar, city)
+      .input("State", sql.NVarChar, state)
+      .input("Pincode", sql.NVarChar, pincode)
+      .input("AddressType", sql.NVarChar, type)
+      .input("IsDefault", sql.Bit, isDefault ? 1 : 0)
+      .query(`
+        UPDATE Address
+        SET
+          FullName = @FullName,
+          MobileNumber = @MobileNumber,
+          AddressLine1 = @AddressLine1,
+          AddressLine2 = @AddressLine2,
+          Landmark = @Landmark,
+          City = @City,
+          State = @State,
+          Pincode = @Pincode,
+          AddressType = @AddressType,
+          IsDefault = @IsDefault,
+          UpdatedDate = GETDATE()
+        WHERE AddressID = @AddressID
+      `);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+app.delete("/api/address/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("AddressID", sql.Int, id)
+      .query(`
+        DELETE FROM Address
+        WHERE AddressID = @AddressID
+      `);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+app.put("/api/address/set-default/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("UserID", sql.Int, userId)
+      .query(`
+        UPDATE Address
+        SET IsDefault = 0
+        WHERE UserID = @UserID
+      `);
+
+    await pool.request()
+      .input("AddressID", sql.Int, id)
+      .query(`
+        UPDATE Address
+        SET IsDefault = 1
+        WHERE AddressID = @AddressID
+      `);
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
   }
 });

@@ -1,0 +1,78 @@
+.admin-cstmrs-container {
+  background: #f6fff2;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.admin-cstmrs-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2f6b2f;
+  margin-bottom: 20px;
+}
+
+.admin-cstmrs-count {
+  background: #e7f4e4;
+  padding: 10px 18px;
+  border-radius: 8px;
+  width: fit-content;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #3a8c3a;
+}
+
+.admin-cstmrs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.admin-cstmrs-table th {
+  text-align: center;
+  padding: 14px;
+  background: #f0f7ed;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 2px solid #d7e7d3;
+}
+
+.admin-cstmrs-table td {
+  padding: 14px;
+  border-bottom: 1px solid #eee;
+}
+.admin-cstmrs-table .admin-cstmrs-actions{
+    padding: 14px 30px;
+}
+
+.admin-cstmrs-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-cstmrs-name span {
+  font-size: 12px;
+  color: #777;
+}
+
+.admin-cstmrs-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 10px;
+}
+
+.admin-cstmrs-edit {
+  color: #2fa84f;
+}
+
+.admin-cstmrs-delete {
+  color: #e74c3c;
+}
+
+.admin-cstmrs-count span{
+    color: #e74c3c;
+    font-size: 20px;
+}

@@ -26,9 +26,16 @@ import Success from "./success";
 import GlobalTracker from "./GlobalTracker";
 import ProductList from "./productList";
 import CategoryProductPage from "./categoryProductPage";
-import ProductDetail from "./productDetail";
+import ProductDetail from "./ProductDetail";
 import AdminLayout from "./admin_back_office/AdminLayout";
 import Charts from "./admin_back_office/components/charts";
+import AddProduct from "./admin_back_office/addProduct";
+import AdminProduct from "./admin_back_office/AdminProduct";
+import AdminChooseCategory from "./admin_back_office/AdminChooseCategory";
+import AdminCategory from "./admin_back_office/AdminCategory";
+import AdminOrders from "./admin_back_office/AdminOrders";
+import AdminCustomers from "./admin_back_office/AdminCustomers";
+import AdminCustomerDetails from "./admin_back_office/AdminCustomerDetails";
 
 function HomePage() {
   const location = useLocation();
@@ -44,7 +51,7 @@ function HomePage() {
     <>
       <Navbar />
       <section id="home"> <Hero /> </section>
-
+ 
       <section id="products">  <Products /><ProductGrid />  </section>
 
       <section id="about">  <AboutPage /> </section>
@@ -82,10 +89,16 @@ function App() {
               <Route path="/t&c" element={<TermsConditions />} />
               <Route path="/payment" element={<Payment />} />
               <Route path="/success" element={<Success />} />
-                {/*admin ui*/ }
+              {/*admin ui*/ }
               <Route path="/admin/*" element={<AdminLayout />} />  
               <Route path="/chart" element={<Charts/>} />
-
+              <Route path="/addProduct" element={<AddProduct/>} />
+              <Route path="/AdminProduct" element={<AdminProduct/>} />
+              <Route path="/AdminChooseCategory" element={<AdminChooseCategory/>} />
+              <Route path="/AdminCategory" element={<AdminCategory/>} />
+              <Route path="/AdminOrders" element={<AdminOrders/>} />
+              <Route path="/AdminCustomers" element={<AdminCustomers/>} />
+              <Route path="/AdminCustomerDetails" element={<AdminCustomerDetails/>} />
             </Routes>
             </GlobalTracker>
           </AddressProvider>

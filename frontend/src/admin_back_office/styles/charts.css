@@ -1,11 +1,11 @@
-.ad-charts{
+/* .ad-charts{
   display:grid;
   grid-template-columns: 2fr 1fr;
   gap:20px;
   margin-top:20px;
 }
 
-/* CARD */
+
 .ad-card{
   background:#fff;
   padding:20px;
@@ -13,7 +13,7 @@
   box-shadow:0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* GRAPH HEADER */
+
 .ad-graph-header{
   display:flex;
   justify-content:space-between;
@@ -26,7 +26,7 @@
   color:#222;
 }
 
-/* FILTERS */
+
 .ad-filters{
   display:flex;
   gap:8px;
@@ -54,7 +54,7 @@
   border-color:#3aaa35;
 }
 
-/* SIZES */
+
 .ad-graph{
   height:350px;
 }
@@ -65,3 +65,7 @@
   flex-direction:column;
   justify-content:center;
 }
+
+.chart-body canvas{
+  width: 100px; 
+} */

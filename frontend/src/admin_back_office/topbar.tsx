@@ -9,7 +9,7 @@ const Header = () => {
         <div className="ad-profile">Madhusudan ▾</div>
       </div>
 
-      <h2 className="ad-welcome">Hello, Madhusudan! Look at your store</h2>
+      {/* <h2 className="ad-welcome">Hello, Madhusudan! Look at your store</h2> */}
     </>
   );
 };

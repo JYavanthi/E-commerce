@@ -208,7 +208,7 @@ const API_URL = API_URLS.BASE_URL;
 
 export type CartItem = {
   cartId: number;
-  id: number; // ProductID
+  id: number; 
   title: string;
   price: number;
   qty: number;
@@ -235,18 +235,25 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     return localStorage.getItem("userId");
   };
 
-  // 🔹 LOAD CART
+
+
   const loadCart = async () => {
-    const userId = getUserId();
-    if (!userId) {
-      setCartItems([]);
-      return;
-    }
+  const userId = getUserId();
+  if (!userId) {
+    setCartItems([]);
+    return;
+  }
 
+  try {
     const res = await fetch(`${API_URL}${API_URLS.CART}/${userId}`);
-    const data = await res.json();
+    const result = await res.json();
 
-    const mapped = data.map((item: any) => ({
+    // 👇 IMPORTANT FIX
+    const cartArray = Array.isArray(result)
+      ? result                // if backend returns array
+      : result.data || [];    // if backend returns { success, data }
+
+    const mapped = cartArray.map((item: any) => ({
       cartId: item.CartID,
       id: item.ProductID,
       title: item.ProductName,
@@ -257,7 +264,11 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }));
 
     setCartItems(mapped);
-  };
+  } catch (error) {
+    console.error("Load cart error:", error);
+    setCartItems([]);
+  }
+};
 
   useEffect(() => {
     loadCart();

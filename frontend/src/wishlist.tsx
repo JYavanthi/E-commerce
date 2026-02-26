@@ -4,7 +4,7 @@ import Footer from "./footer";
 import { useWishlist } from "./context/WishlistContext";
 import { useCart } from "./context/CartContext";
 import { useNavigate } from "react-router-dom";
-import ProductGrid from "./productgrid";
+
 
 const Wishlist = () => {
   const { wishlistItems, removeFromWishlist } = useWishlist();
@@ -36,14 +36,14 @@ const Wishlist = () => {
                 </button>
 
                 {/* IMAGE */}
-                <img src={item.img} alt={item.title}  className="product-img"/>
+                <img src={item.img} alt={item.title}  className="wsh-product-img"/>
 
                 {/* DETAILS */}
                  <p className="wsh-product-category">{item.category}</p>
                 <h4 className="wsh-product-title">{item.title}</h4>
-                {item.desc && (
+                {/* {item.desc && (
                    <p className="wsh-product-desc">{item.desc}</p>
-                   )}   
+                   )}    */}
                       {item.price && (
                     <span className="wsh-product-weight">{item.weight}</span>
                   )}
