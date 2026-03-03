@@ -1,10 +1,10 @@
-.adm-cst-dtls-wrapper {
+ /* .adm-cst-dtls-wrapper {
   background: #eaf6e3;
   padding: 40px;
   font-family: Arial, sans-serif;
 }
 
-/* ACCOUNT SECTION */
+
 .adm-cst-dtls-account-section {
   display: flex;
   gap: 30px;
@@ -38,7 +38,7 @@
   text-align: left;
 }
 
-/* DETAILS CARD */
+
 .adm-cst-dtls-details-card {
   flex: 1;
   background: #f6f6f6;
@@ -85,7 +85,7 @@
   margin-bottom: 10px;
 }
 
-/* ORDER HISTORY */
+
 .adm-cst-dtls-history-section {
   margin-bottom: 40px;
 }
@@ -126,9 +126,9 @@
   text-align: right;
   color: green;
   font-weight: bold;
-}
+}*/
 
-/* WISHLIST */
+/* 
 .adm-cst-dtls-wishlist-row {
   display: flex;
   gap: 20px;
@@ -159,11 +159,674 @@
 
 .adm-cst-dtls-wishlist-card button.out {
   background: #e91e63;
+}  */
+
+
+.adm-cst-dtls-wrapper {
+  background: #e8f5e9;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  height: 100vh; /* 🔥 ADDED: Limit height to viewport */
+  overflow-y: auto; /* 🔥 ADDED: Enable vertical scrolling */
+  overflow-x: hidden; /* 🔥 ADDED: Prevent horizontal scroll */
 }
 
-.adm-cst-dtls-seeall {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 14px;
+/* 🔥 ADDED: Custom scrollbar styling */
+.adm-cst-dtls-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.adm-cst-dtls-wrapper::-webkit-scrollbar-track {
+  background: #c8e6c9;
+  border-radius: 10px;
+}
+
+.adm-cst-dtls-wrapper::-webkit-scrollbar-thumb {
+  background: #4caf50;
+  border-radius: 10px;
+}
+
+.adm-cst-dtls-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #45a049;
+}
+
+/* Header */
+.adm-cst-dtls-header {
+     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 7px 25px;
+    border-radius: 15px;
+    margin-bottom: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    
+}
+
+.adm-cst-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-cst-icon {
+  font-size: 24px;
+  background: #c8e6c9;
+  padding: 8px 12px;
+  border-radius: 10px;
+}
+
+.adm-cst-header-title h2 {
+  margin: 0;
+  color: #2e7d32;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.adm-cst-back-btn,
+.adm-cst-next-btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.adm-cst-back-btn:hover,
+.adm-cst-next-btn:hover {
+  background: #45a049;
+}
+
+/* Account Section */
+.adm-cst-dtls-account-section {
+      background: white;
+    border-radius: 20px;
+    padding: 10px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+.adm-cst-section-header {
+     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e8f5e9;
+}
+
+.adm-cst-section-header h3 {
+  margin: 0;
+    color: #2e7d32;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+
+.adm-cst-action-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.adm-cst-edit-icon,
+.adm-cst-delete-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease;
+}
+
+.adm-cst-edit-icon:hover,
+.adm-cst-delete-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Account Content */
+.adm-cst-account-content {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+/* Personal Details Card */
+.adm-cst-dtls-profile-card {
+  background: #f0f9f0;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    padding-top: 10px;
+}
+
+.adm-cst-personal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-bottom: 15px; */
+}
+
+.adm-cst-personal-header h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #555;
+  font-weight: 700;
+}
+
+.adm-cst-edit-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s ease;
+}
+
+.adm-cst-edit-small:hover {
+  transform: scale(1.1);
+}
+
+.adm-cst-dtl-prsnl{
+  display: flex;
+}
+.adm-cst-dtls-profile-img {
+width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    object-fit: cover;
+    margin: 15px auto;
+    display: block;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-left: 3px;
+    margin-right: 24px;
+    margin-bottom:22px;
+}
+.adm-cst-dtl-prsnl-name{
+  text-align: left;
+ align-content: center;
+}
+.adm-cst-name {
+  margin: 15px 0 5px;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.adm-cst-dtls-id {
+  color: #888;
+    font-size: 14px;
+    margin-bottom: 20px;
+    margin-top: -3px;
+    font-size: 15px;
+}
+
+.adm-cst-dtls-contact {
+  text-align: left;
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.adm-cst-dtls-contact p {
+  margin: 10px 0;
+  font-size: 13px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Account Details Card */
+.adm-cst-dtls-details-card {
+  background: #f0f9f0;
+  border-radius: 15px;
+  padding: 20px;
+  padding-top: 5px;
+}
+
+.adm-cst-details-header {
+      display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 5px;
+    padding: 8px 0px;
+  
+}
+
+.adm-cst-details-header h4 {
+  margin: 0;
+  font-size: 12px;
+  color: #555;
+  font-weight: 700;
+}
+
+.adm-cst-details-content {
+  background: white;
+  padding: 2px 20px;
+  border-radius: 10px;
+}
+
+.adm-cst-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 0;
+  /* border-bottom: 1px solid #f0f0f0; */
+}
+
+.adm-cst-detail-row:last-child {
+  border-bottom: none;
+}
+
+.adm-cst-label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.adm-cst-value {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Address Section */
+.adm-cst-address-section {
+      display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 7px;
+    margin-bottom: -13px;
+}
+
+.adm-cst-address-box {
+ margin: 0 0 6px;
+    font-size: 12px;
+    color: #555;
+    font-weight: 700;
+    margin-top: 7px;
+    background-color: white;
+    border-radius: 20px;
+    margin-left: 0px;
+    padding-left: 18px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.adm-cst-address-box h4 {
+  margin: 0 0 15px;
+  font-size: 12px;
+  color: #a54d4d;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.adm-cst-address-box p {
+  margin: 0px 0;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.adm-cst-order-section {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 20px 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  padding-bottom: 10px;
+}
+
+.adm-cst-order-section h3 {
+  margin: 0 0 15px;
+  color: #2e7d32;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* Scroll Container */
+
+/* .adm-cst-order-container {
+  height: 140px;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.adm-cst-order-container.expanded {
+  height: 300px;
+  overflow-y: auto;
+} */
+
+.adm-cst-order-container {
+  max-height: 180px; /* default */
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.adm-cst-order-container.show-all {
+  max-height: 320px; /* showAll height */
+  overflow-y: auto;
+}
+
+.adm-cst-order-container.expanded {
+  max-height: 1000px; /* when details open */
+  overflow: visible;
+}
+
+.adm-cst-order-card {
+  background: white;
+  border: 1.5px solid #b6e2b1;
+  border-radius: 12px;
+  padding:0px 15px;
+  margin-bottom: 12px;
+}
+
+/* Top Row */
+
+.adm-cst-order-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.adm-cst-order-img {
+  width: 110px;
+  height: 110px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.adm-cst-order-details {
+  flex: 1;
+}
+
+.adm-cst-order-details h4 {
+ margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2e7d32;
+}
+
+.adm-cst-order-details span{
+  color:red;
+  font-size: 18px;
+}
+
+.adm-cst-order-details p {
+      margin: 3px 0;
+    font-size: 17px;
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.adm-cst-order-id {
+  color: #555 !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+/* Status */
+
+.adm-cst-order-status {
+  text-align: right;
+  min-width: 180px;
+}
+
+.adm-cst-status-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2e7d32;
+  margin-bottom: 5px;
+}
+
+.adm-cst-delivery-date {
+  font-size: 15px;
+    font-weight: 600;
+    color: #d85f3a;
+    letter-spacing: 1px;
+}
+
+/* View More */
+
+.adm-cst-order-details .adm-cst-view-more {
+  margin-top: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #2463c5;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+/* Expanded Product Box */
+
+.adm-cst-expanded-box {
+    margin-top: 2px;
+    background: white;
+    border: 1px solid #cfe6cc;
+    border-radius: 10px;
+    padding: 15px;
+    animation: fadeIn 0.3s ease-in-out;
+    margin-bottom: 10px;
+}
+
+/* Product Table */
+
+.adm-cst-product-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.adm-cst-product-table thead {
+  background: #e8f5e9;
+}
+
+.adm-cst-product-table th {
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.adm-cst-product-table td {
+  padding: 10px;
+  font-size: 13px;
+  border-top: 1px solid #ddd;
+}
+.adm-cst-product-table .cst-prd-name{
+  width: 260px;
+}
+
+.adm-cst-product-table tbody tr:nth-child(even) {
+  background: #ffffff;
+}
+
+/* Total */
+
+.adm-cst-order-total {
+  text-align: right;
+  margin-top: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #2e7d32;
+}
+
+/* Toggle Button */
+
+.adm-cst-toggle {
+  display: inline-block;
+  margin-top: 12px;
+  background: #f3e79b;
+  color: #333;
+  padding: 5px 18px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.adm-cst-toggle:hover {
+  background: #f0dc74;
+}
+
+/* No Orders */
+
+.adm-cst-no-orders {
+  text-align: center;
+  font-size: 12px;
+  color: #777;
+  margin-top: 10px;
+}
+
+/* Animation */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Wishlist */
+.adm-cst-wishlist-section {
+  background: white;
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+}
+
+.adm-cst-wishlist-section h3 {
+      margin: 0 0 18px;
+    color: #2e7d32;
+    font-size: 19px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.adm-cst-wishlist-scroll {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adm-cst-scroll-btn {
+  background: #4dd4ac;
+  color: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 8px rgba(77, 212, 172, 0.3);
+}
+
+.adm-cst-scroll-btn:hover {
+  background: #3bc199;
+}
+
+.adm-cst-wishlist-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 5px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.adm-cst-wishlist-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.adm-cst-wishlist-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 140px;
+  max-width: 140px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.adm-cst-wishlist-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.adm-cst-wishlist-card img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #f5f5f5;
+}
+
+.adm-cst-wishlist-card h5 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+  line-height: 1.3;
+  min-height: 32px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.adm-cst-wishlist-price {
+  color: #4caf50;
+  font-weight: 700;
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.adm-cst-add-btn {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 7px 16px;
+  border-radius: 18px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  width: 100%;
+  transition: all 0.3s ease;
+  text-transform: capitalize;
+}
+
+.adm-cst-add-btn:hover {
+  background: #45a049;
+  transform: scale(1.02);
+}
+
+.adm-cst-add-btn:active {
+  transform: scale(0.98);
 }

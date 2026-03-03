@@ -1,145 +1,549 @@
-import React from "react";
-import "./styles/AdminCustomerDetails.css";
+// import React from "react";
+// import "./styles/AdminCustomerDetails.css";
+// import user from "../assets/user.png";
 
-export default function AdminCustomerDetails() {
+// interface Props {
+//   customer: any;
+// }
+
+// export default function AdminCustomerDetails({ customer }: Props) {
+//   return (
+//     <div className="adm-cst-dtls-wrapper">
+//       {/* Header */}
+//       <div className="adm-cst-dtls-header">
+//         <button className="adm-cst-back-btn">←</button>
+//         <div className="adm-cst-header-title">
+//           <span className="adm-cst-icon">👥</span>
+//           <h2>CUSTOMER DETAILS</h2>
+//         </div>
+//         <button className="adm-cst-next-btn">→</button>
+//       </div>
+
+//       {/* Account Section */}
+//       <div className="adm-cst-dtls-account-section">
+//         <div className="adm-cst-section-header">
+//           <h3>ACCOUNT</h3>
+//           <div className="adm-cst-action-icons">
+//             <button className="adm-cst-edit-icon">✏️</button>
+//             <button className="adm-cst-delete-icon">🗑️</button>
+//           </div>
+//         </div>
+
+//         <div className="adm-cst-account-content">
+//           {/* Personal Details */}
+//           <div className="adm-cst-dtls-profile-card">
+//             <div className="adm-cst-personal-header">
+//               <h4>PERSONAL DETAILS</h4>
+//               <button className="adm-cst-edit-small">✏️</button>
+//             </div>
+//             <div className="adm-cst-dtl-prsnl">
+//               <img
+//               src={user}
+//               alt="profile"
+//               className="adm-cst-dtls-profile-img"/>
+//               <div className="adm-cst-dtl-prsnl-name">
+//                 <h3 className="adm-cst-name">Name : {customer.FirstName} {customer.LastName}</h3>
+//                 <p className="adm-cst-dtls-id">ID :  {customer.UserID}</p>
+//               </div>
+//             </div>
+
+//             <div className="adm-cst-dtls-contact">
+//               <p>📍 Bangalore, Karnataka</p>
+//               <p>✉️ {customer.Email}</p>
+//               <p>📞 {customer.ContactNo}</p>
+//             </div>
+//           </div>
+
+//           {/* Account Details */}
+//           <div className="adm-cst-dtls-details-card">
+//             <div className="adm-cst-details-header">
+//               <h4>ACCOUNT DETAILS</h4>
+//               <button className="adm-cst-edit-small">✏️</button>
+//             </div>
+
+//             <div className="adm-cst-details-content">
+//               <div className="adm-cst-detail-row">
+//                 <span className="adm-cst-label">First Name:</span>
+//                 <span className="adm-cst-value">{customer.FirstName}</span>
+//               </div>
+//               <div className="adm-cst-detail-row">
+//                 <span className="adm-cst-label">Last Name:</span>
+//                 <span className="adm-cst-value">{customer.LastName}</span>
+//               </div>
+//               <div className="adm-cst-detail-row">
+//                 <span className="adm-cst-label">Registration Date:</span>
+//                 <span className="adm-cst-value">{customer.CreatedDt || "10/10/1999"}</span>
+//               </div>
+//               <div className="adm-cst-detail-row">
+//                 <span className="adm-cst-label">Usage:</span>
+//                 <span className="adm-cst-value">2 Hours</span>
+//               </div>
+//             </div>
+//             <div className="adm-cst-address-section">
+//               <div className="adm-cst-address-box">
+//                 <h4>SHIPPING DETAILS</h4>
+//                 <p><strong>Address:</strong> Flat 305, Green Heights, Marathahalli</p>
+//                 <p><strong>Landmark:</strong> Near Kalasipalya Bus Stop</p>
+//                 <p><strong>City:</strong> Bangalore</p>
+//                 <p><strong>State:</strong> Karnataka</p>
+//                 <p><strong>PIN Code:</strong> 560037</p>
+//               </div>
+
+//               <div className="adm-cst-address-box">
+//                 <h4>BILLING DETAILS</h4>
+//                 <p><strong>Address:</strong> Flat 305, Green Heights, Marathahalli</p>
+//                 <p><strong>Landmark:</strong> Near Kalasipalya Bus Stop</p>
+//                 <p><strong>City:</strong> Bangalore</p>
+//                 <p><strong>State:</strong> Karnataka</p>
+//                 <p><strong>PIN Code:</strong> 560037</p>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//       {/* Order History */}
+//       <div className="adm-cst-order-section">
+//         <h3>ORDER HISTORY</h3>
+        
+//         <div className="adm-cst-order-card">
+//           <img 
+//             src="https://via.placeholder.com/100" 
+//             alt="product"
+//             className="adm-cst-order-img"
+//           />
+          
+//           <div className="adm-cst-order-details">
+//             <h4>Fox Tail Millets</h4>
+//             <p>Qty: 1</p>
+//             <p className="adm-cst-order-id">Order ID: KP2544333</p>
+//             <p className="adm-cst-order-date">See All</p>
+//           </div>
+
+//           <div className="adm-cst-order-status">
+//             <span className="adm-cst-status-badge delivered">Order delivered</span>
+//             <p className="adm-cst-delivery-date">31/08/2025</p>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Wishlist */}
+//       <div className="adm-cst-wishlist-section">
+//         <h3>💗 WISHLIST</h3>
+        
+//         <div className="adm-cst-wishlist-scroll">
+//           <button className="adm-cst-scroll-btn left">◀</button>
+          
+//           <div className="adm-cst-wishlist-container">
+//             {[
+//               { name: "Foxtail Red Natuna", price: "₹ 200", img: "https://via.placeholder.com/100" },
+//               { name: "Jaggery Chai", price: "₹ 150", img: "https://via.placeholder.com/100" },
+//               { name: "Pure Honey", price: "₹ 350", img: "https://via.placeholder.com/100" },
+//               { name: "Pumpkin Seeds", price: "₹ 120", img: "https://via.placeholder.com/100" },
+//               { name: "Green Tea", price: "₹ 180", img: "https://via.placeholder.com/100" },
+//             ].map((item, idx) => (
+//               <div key={idx} className="adm-cst-wishlist-card">
+//                 <img src={item.img} alt={item.name} />
+//                 <h5>{item.name}</h5>
+//                 <p className="adm-cst-wishlist-price">{item.price}</p>
+//                 <button className="adm-cst-add-btn">Add</button>
+//               </div>
+//             ))}
+//           </div>
+
+//           <button className="adm-cst-scroll-btn right">▶</button>
+//         </div>
+//       </div>
+//     </div>
+//     </div>
+//   );
+// }
+
+
+import React, { useEffect, useState } from "react";
+import "./styles/AdminCustomerDetails.css";
+import user from "../assets/user.png";
+interface Props {
+  customer: any;
+}
+
+export default function AdminCustomerDetails({ customer }: Props) {
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [wishlist, setWishlist] = useState<any[]>([]);
+  const [address, setAddress] = useState<any>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  
+
+  /* ================= API CALLS ================= */
+  useEffect(() => {
+    if (!customer?.UserID) return;
+
+    /* ADDRESS */
+    fetch(`http://localhost:4000/api/address/${customer.UserID}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const defaultAddress = data.data.find(
+            (a: any) => a.IsDefault === 1 || a.IsDefault === true
+          );
+          setAddress(defaultAddress);
+        }
+      });
+
+    /* ORDERS */
+    fetch("http://localhost:4000/api/admin/orders")
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const userOrders = data.data.filter(
+            (o: any) => o.userId === customer.UserID
+          );
+          setOrders(userOrders);
+        }
+      });
+
+    /* WISHLIST */
+    fetch(`http://localhost:4000/api/wishlist/${customer.UserID}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setWishlist(data.data);
+        }
+      });
+
+  }, [customer]);
+
+  
+  const displayedOrders = showAll
+  ? orders.slice(0, 3)
+  : orders.slice(0, 1);
+
   return (
     <div className="adm-cst-dtls-wrapper">
 
-      {/* ================= ACCOUNT SECTION ================= */}
+      {/* Header */}
+      <div className="adm-cst-dtls-header">
+        <button className="adm-cst-back-btn">←</button>
+        <div className="adm-cst-header-title">
+          <span className="adm-cst-icon">👥</span>
+          <h2>CUSTOMER DETAILS</h2>
+        </div>
+        <button className="adm-cst-next-btn">→</button>
+      </div>
+
+      {/* Account Section */}
       <div className="adm-cst-dtls-account-section">
-
-        {/* LEFT PROFILE CARD */}
-        <div className="adm-cst-dtls-profile-card">
-          <img
-            src="https://i.pravatar.cc/150?img=44"
-            alt="profile"
-            className="adm-cst-dtls-profile-img"
-          />
-
-          <h3>Jassica Josoph</h3>
-          <p className="adm-cst-dtls-id">ID 112234478</p>
-
-          <div className="adm-cst-dtls-contact">
-            <p>📍 Bangalore, Karnataka</p>
-            <p>✉ jassicajoseph@gmail.com</p>
-            <p>📞 +91 8973525354</p>
+        <div className="adm-cst-section-header">
+          <h3>ACCOUNT</h3>
+          <div className="adm-cst-action-icons">
+            {/* <button className="adm-cst-edit-icon">✏️</button> */}
+            <button className="adm-cst-delete-icon">🗑️</button>
           </div>
         </div>
 
-        {/* RIGHT DETAILS */}
-        <div className="adm-cst-dtls-details-card">
+        <div className="adm-cst-account-content">
 
-          <div className="adm-cst-dtls-details-header">
-            <h3>ACCOUNT DETAILS</h3>
-            <div className="adm-cst-dtls-actions">
-              <span>✏</span>
-              <span>🗑</span>
+          {/* Personal Details */}
+          <div className="adm-cst-dtls-profile-card">
+            <div className="adm-cst-personal-header">
+              <h4>PERSONAL DETAILS</h4>
+              {/* <button className="adm-cst-edit-small">✏️</button> */}
+            </div>
+
+            <div className="adm-cst-dtl-prsnl">
+              <img src={user} alt="profile" className="adm-cst-dtls-profile-img" />
+              <div className="adm-cst-dtl-prsnl-name">
+                <h3 className="adm-cst-name">
+                  Name : {customer.FirstName} {customer.LastName}
+                </h3>
+                <p className="adm-cst-dtls-id">ID : {customer.UserID}</p>
+              </div>
+            </div>
+
+            <div className="adm-cst-dtls-contact">
+              <p>📍 {address?.City || "N/A"}, {address?.State || ""}</p>
+              <p>✉️ {customer.Email}</p>
+              <p>📞 {customer.ContactNo}</p>
             </div>
           </div>
 
-          <div className="adm-cst-dtls-details-grid">
-
-            {/* Account Info */}
-            <div className="adm-cst-dtls-box">
-              <div><b>First Name:</b> Jassica</div>
-              <div><b>Last Name:</b> Josoph</div>
-              <div><b>Date Of Birth:</b> 15/10/1999</div>
-              <div><b>Gender:</b> Female</div>
+          {/* Account Details */}
+          <div className="adm-cst-dtls-details-card">
+            <div className="adm-cst-details-header">
+              <h4>ACCOUNT DETAILS</h4>
             </div>
 
-            {/* Meta Info */}
-            <div className="adm-cst-dtls-box">
-              <div><b>Registered Date</b><br/>15/04/2026</div>
-              <div><b>Usage</b><br/>Visited 03 Hours Spent: 2 hrs</div>
+            <div className="adm-cst-details-content">
+              <div className="adm-cst-detail-row">
+                <span className="adm-cst-label">First Name:</span>
+                <span className="adm-cst-value">{customer.FirstName}</span>
+              </div>
+              <div className="adm-cst-detail-row">
+                <span className="adm-cst-label">Last Name:</span>
+                <span className="adm-cst-value">{customer.LastName}</span>
+              </div>
+              <div className="adm-cst-detail-row">
+                <span className="adm-cst-label">Registration Date:</span>
+                <span className="adm-cst-value">
+                  {customer.CreatedDt
+                    ? new Date(customer.CreatedDt).toLocaleDateString()
+                    : "-"}
+                </span>
+              </div>
+              <div className="adm-cst-detail-row">              
+                <span className="adm-cst-label">Usage:</span>
+                <span className="adm-cst-value">2 Hours</span>
+              </div>
             </div>
 
+            {/* Address */}
+            <div className="adm-cst-address-section">
+              <div className="adm-cst-address-box">
+                <h4>SHIPPING DETAILS</h4>
+                <p><strong>Address:</strong> {address?.AddressLine1}, {address?.AddressLine2}</p>
+                <p><strong>Landmark:</strong> {address?.Landmark}</p>
+                <p><strong>City:</strong> {address?.City}</p>
+                <p><strong>State:</strong> {address?.State}</p>
+                <p><strong>PIN Code:</strong> {address?.Pincode}</p>
+              </div>
+
+              <div className="adm-cst-address-box">
+                <h4>BILLING DETAILS</h4>
+                <p><strong>Address:</strong> {address?.AddressLine1},, {address?.AddressLine2}</p>
+                <p><strong>Landmark:</strong> {address?.Landmark}</p>
+                <p><strong>City:</strong> {address?.City}</p>
+                <p><strong>State:</strong> {address?.State}</p>
+                <p><strong>PIN Code:</strong> {address?.Pincode}</p>
+              </div>
+            </div>
           </div>
+        </div>
 
-          {/* Shipping Details */}
-          <div className="adm-cst-dtls-shipping-wrapper">
+   
+  {/* <div className="adm-cst-order-section">
+  <h3>ORDER HISTORY</h3>
 
-            <div className="adm-cst-dtls-ship-box">
-              <h4>SHIPPING DETAILS</h4>
-              <p><b>Address:</b> Plot 204, Green Heights Apartment</p>
-              <p><b>Landmark:</b> Near Kalmandir Bus Stop</p>
-              <p><b>City:</b> Bangalore</p>
-              <p><b>State:</b> Karnataka</p>
-              <p><b>PIN Code:</b> 560037</p>
-            </div>
+  <div
+    style={{
+      maxHeight: showAll ? "330px" : "120px",
+      overflowY: showAll && orders.length > 3 ? "auto" : "hidden"
+    }}
+  >
+    {displayedOrders.map((order, index) => (
+      <div key={index} className="adm-cst-order-card">
+        <img
+          src="https://via.placeholder.com/100"
+          alt="product"
+          className="adm-cst-order-img"
+        />
 
-            <div className="adm-cst-dtls-ship-box">
-              <h4>BILLING DETAILS</h4>
-              <p><b>Address:</b> Plot 204, Green Heights Apartment</p>
-              <p><b>Landmark:</b> Near Kalmandir Bus Stop</p>
-              <p><b>City:</b> Bangalore</p>
-              <p><b>State:</b> Karnataka</p>
-              <p><b>PIN Code:</b> 560037</p>
-            </div>
-          </div>
+        <div className="adm-cst-order-details">
+          <h4>Order #{order.orderId}</h4>
+          <p>Total: ₹ {order.totalAmount}</p>
+          <p className="adm-cst-order-id">
+            Order ID: {order.orderId}
+          </p>
+        </div>
 
+        <div className="adm-cst-order-status">
+          <span className="adm-cst-status-badge delivered">
+            {order.orderStatus}
+          </span>
+          <p className="adm-cst-delivery-date">
+            {order.expectedDelivery}
+          </p>
         </div>
       </div>
+    ))}
 
-      {/* ================= ORDER HISTORY ================= */}
-      <div className="adm-cst-dtls-history-section">
+  
+    {showAll && orders.length <= 1 && (
+      <p style={{ fontSize: "13px", marginTop: "10px", color: "#777" }}>
+        No more orders found
+      </p>
+    )}
+  </div>
 
-        <h3 className="adm-cst-dtls-section-title">ORDER HISTORY</h3>
+ 
+  {orders.length >= 1 && (
+    <p
+      style={{
+        cursor: "pointer",
+        marginTop: "10px",
+        fontWeight: 500,
+        color: "#2e7d32"
+      }}
+      onClick={() => setShowAll(!showAll)}
+    >
+      {showAll ? "See Less" : "See All"}
+    </p>
+  )}
+</div>
 
-        <div className="adm-cst-dtls-order-card">
+     
+<div className="adm-cst-wishlist-section">
+  <h3>WISHLIST</h3>
 
+  {wishlist.length === 0 ? (
+    <p
+      style={{
+        fontSize: "14px",
+        color: "#777",
+        marginTop: "10px"
+      }}
+    >
+      No wishlist products found
+    </p>
+  ) : (
+    wishlist.map((item, index) => (
+      <div key={index} className="adm-cst-wishlist-card">
+        <img
+          src={item.ImageUrl}
+          alt={item.ProductName}
+          className="adm-cst-wishlist-img"
+        />
+
+        <div className="adm-cst-wishlist-details">
+          <h4>{item.ProductName}</h4>
+          <p>₹ {item.Price}</p>
+        </div>
+      </div>
+    ))
+  )}
+</div> */}
+{/* ================= ORDER HISTORY ================= */}
+<div className="adm-cst-order-section">
+  <h3>ORDER HISTORY</h3>
+
+  <div
+    className={`adm-cst-order-container
+         ${showAll ? "show-all" : ""} 
+    ${expandedOrderId ? "expanded" : ""}
+       `}
+  >
+    {displayedOrders.map((order, index) => (
+      <div key={index} className="adm-cst-order-card">
+
+        {/* Order Header */}
+        <div className="adm-cst-order-top">
           <img
-            src="https://images.unsplash.com/photo-1609501676725-7186f7b68b3b"
+            src="https://via.placeholder.com/100"
             alt="product"
+            className="adm-cst-order-img"
           />
 
-          <div className="adm-cst-dtls-order-info">
-            <h4>Fox Tail Millets</h4>
-            <p>250g</p>
-            <p>Qty: 1</p>
-            <span className="adm-cst-dtls-order-id">
-              Order ID: #12344443
+          <div className="adm-cst-order-details">
+            <h4>Order ID : <span>#{order.orderId}</span></h4>
+            <p>Total: ₹ {order.totalAmount}</p>
+            {/* <p className="adm-cst-order-id">
+              Order ID: {order.orderId}
+            </p> */}
+
+            <p
+              className="adm-cst-view-more"
+              onClick={() =>
+                setExpandedOrderId(
+                  expandedOrderId === order.orderId
+                    ? null
+                    : order.orderId
+                )
+              }
+            >
+              {expandedOrderId === order.orderId
+                ? "Hide Details"
+                : "View More Details"}
+            </p>
+          </div>
+
+          <div className="adm-cst-order-status">
+            <span className="adm-cst-status-badge delivered">
+              {order.orderStatus}
             </span>
+            <p className="adm-cst-delivery-date">
+              {order.expectedDelivery}
+            </p>
           </div>
-
-          <div className="adm-cst-dtls-status">
-            <span>Order delivered</span>
-            <small>2-Dec-2025</small>
-          </div>
-
         </div>
 
-        <div className="adm-cst-dtls-seeall">See All..</div>
-      </div>
+        {/* Expanded Product Section */}
+        {expandedOrderId === order.orderId && (
+          <div className="adm-cst-expanded-box">
+            <table className="adm-cst-product-table">
+              <thead>
+                <tr>
+                  <th className="cst-prd-name">Product Name/Product ID</th>
+                  <th>Qty</th>
+                  <th>Weight</th>
+                  <th>Unit Price</th>
+                  <th>Total Price</th>
+                </tr>
+              </thead>
 
-      {/* ================= WISHLIST ================= */}
-      <div className="adm-cst-dtls-wishlist-section">
+              <tbody>
+                {order.items.map((item: any, i: number) => (
+                  <tr key={i}>
+                    <td>{item.ProductName}</td>
+                    <td>{item.Quantity}</td>
+                    <td>{item.ProductWeight}</td>
+                    <td>₹ {item.UnitPrice}</td>
+                    <td>₹ {item.TotalPrice}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        <h3 className="adm-cst-dtls-section-title">
-          ❤️ WISHLIST
-        </h3>
-
-        <div className="adm-cst-dtls-wishlist-row">
-
-          {[
-            { name: "Peri-Peri Makhana", price: 235 },
-            { name: "Jaggery Pan", price: 150 },
-            { name: "Raw Honey", price: 350 },
-            { name: "Pumpkin Seeds", price: 125 },
-            { name: "Green Tea", price: 125, out: true }
-          ].map((item, index) => (
-            <div key={index} className="adm-cst-dtls-wishlist-card">
-              <img src="https://via.placeholder.com/100" alt="product" />
-              <p>{item.name}</p>
-              <h4>₹ {item.price}</h4>
-              <button className={item.out ? "out" : ""}>
-                {item.out ? "Out Of Stock" : "In Stock"}
-              </button>
+            <div className="adm-cst-order-total">
+              Total Amount: ₹ {order.totalAmount}
             </div>
-          ))}
+          </div>
+        )}
+      </div>
+    ))}
 
+    {showAll && orders.length <= 1 && (
+      <p className="adm-cst-no-orders">
+        No more orders found
+      </p>
+    )}
+  </div>
+
+  {orders.length >= 1 && (
+    <p
+      className="adm-cst-toggle"
+      onClick={() => setShowAll(!showAll)}
+    >
+      {showAll ? "See Less" : "See All"}
+    </p>
+  )}
+</div>
+<div className="adm-cst-wishlist-section">
+        <h3>💗 WISHLIST ITEMS</h3>
+        <div className="adm-cst-wishlist-scroll">
+          <button className="adm-cst-scroll-btn left">◀</button>
+
+          <div className="adm-cst-wishlist-container">
+            {wishlist.map((item: any) => (
+              <div key={item.ProductID} className="adm-cst-wishlist-card">
+                <img
+                  src={
+                    item.ImageUrl ||
+                    "https://via.placeholder.com/100"
+                  }
+                  alt={item.ProductName}
+                />
+                <h5>{item.ProductName}</h5>
+                <p className="adm-cst-wishlist-price">
+                  ₹ {item.Price}
+                </p>
+                {/* <button className="adm-cst-add-btn">Add</button> */}
+              </div>
+            ))}
+          </div>
+          <button className="adm-cst-scroll-btn right">▶</button>
         </div>
       </div>
-
+    </div>
     </div>
   );
 }
