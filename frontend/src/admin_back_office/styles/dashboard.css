@@ -179,13 +179,13 @@
 }
 
 .ad-table thead{
-  background:#f5f7fa;
+  background:#e8f5e9;
 }
 
 .ad-table th{
-  text-align:left;
-  padding:14px;
-  font-weight:600;
+      text-align: center;
+    padding: 13px 8px;
+    font-weight: 600;
 }
 
 .ad-table td{
@@ -194,24 +194,26 @@
 }
 
 /* STATUS */
-.status{
-  padding:6px 14px;
-  border-radius:20px;
-  font-size:12px;
-  font-weight:700;
+.pay-status{
+   background: #e6f7ec;
+    color: green;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: 600;      
 }
 
-.status.completed{
+.pay-status.completed{
   background:#d9f5d1;
   color:#2e7d32;
 }
 
-.status.pending{
+.pay-status.pending{
   background:#fff4c2;
   color:#9a7b00;
 }
 
-.status.failed{
+.pay-status.failed{
   background:#ffd6d6;
   color:#b71c1c;
 }

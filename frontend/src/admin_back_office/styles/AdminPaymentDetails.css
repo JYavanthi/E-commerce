@@ -1,0 +1,347 @@
+.adm-paydtl-wrapper {
+      background: white;
+    padding: 30px;
+    min-height: 100vh;
+    padding-top: 0px;
+    margin-top: 75px;
+    border-radius: 20px;
+}
+
+.adm-paydtl-top {
+      display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    border-bottom: 1px solid black;
+    padding-bottom: 0px;
+}
+
+.adm-paydtl-userid{
+    display: flex;
+}
+
+
+.adm-paydtl-userid span {
+      font-size: 17px;
+    color: #555;
+    font-weight: 600;
+}
+
+.adm-paydtl-userid strong {
+  display: block;
+    font-size: 17px;
+    padding-left: 11px;
+    font-weight: 600;
+    color: green;
+}
+
+.adm-paydtl-top .adm-paydtl-title {
+  color: #2e7d32;
+    margin-bottom: 12px;
+    margin-top: 13px;
+    margin-right: 24px;
+}
+
+.adm-paydtl-download {
+  cursor: pointer;
+    font-size: 14px;
+    text-decoration: underline;
+    color: blue;
+    margin-right: 4px;
+}
+
+.adm-paydtl-card {
+  background: #f3fff1;
+  border-radius: 20px;
+  padding: 25px;
+  display: flex;
+  gap: 30px;
+}
+
+/* PROFILE SECTION */
+.adm-paydtl-profile-card {
+  background: #f0f9f0;
+  border-radius: 15px;
+  padding: 20px;
+  width: 300px;
+  padding-top: 0px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.adm-paydtl-personal-header h4 {
+  font-size: 12px;
+  color: #555;
+  font-weight: 700;
+  text-align: center;
+}
+
+.adm-paydtl-dtl-prsnl {
+  display: flex;
+      justify-content: center;
+}
+
+.adm-paydtl-profile-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 15px;
+  object-fit: cover;
+  /* margin-right: 20px; */
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.adm-paydtl-name {
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+/* .adm-paydtl-id {
+  color: #888;
+  font-size: 14px;
+} */
+
+/* .adm-paydtl-contact {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.adm-paydtl-contact p {
+  margin: 8px 0;
+  font-size: 13px;
+} */
+
+.adm-paydtl-contact {
+  background: white;
+  padding: 10px 15px;
+  border-radius: 12px;
+  margin-top: 24px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+/* Each row */
+.adm-paydtl-row {
+  display: grid;
+  grid-template-columns: 134px 1fr; /* fixed key column */
+  align-items: center;
+  padding: 3px 0;
+ 
+}
+
+/* Remove last border */
+.adm-paydtl-row:last-child {
+  border-bottom: none;
+}
+
+/* Left side (keys) */
+.adm-paydtl-key {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+/* Right side (values) */
+.adm-paydtl-value {
+  font-size: 13px;
+  word-break: break-word;
+  font-weight: 600;
+    color: #666;
+}
+
+/* RIGHT SIDE */
+.adm-paydtl-content {
+  flex: 1;
+}
+
+.adm-paydtl-order-header {
+         display: flex;
+    justify-content: space-between;
+    margin-bottom: 26px;
+    margin-top: 10px;
+    border-bottom: 1px solid black;
+    padding-bottom: 11px;
+}
+
+.adm-paydtl-order-header strong{
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.adm-paydtl-order-header .paydtl-ord-id{
+    color: red;
+}
+
+.adm-paydtl-order-header span{
+    font-size: 17px;
+    font-weight: 600;
+    color: rgb(60, 4, 4);
+    margin-right: 10px;
+}
+
+.adm-paydtl-body {
+  display: flex;
+  gap: 25px;
+}
+
+.adm-paydtl-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.adm-paydtl-item-img {
+  width: 60px;
+  height: 60px;
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+/* 
+.adm-paydtl-summary {
+  width: 488px;
+  background: #f0f9f0;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.adm-paydtl-total {
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.adm-paydtl-total span {
+  display: block;
+  color: #2e7d32;
+  font-size: 18px;
+  margin-top: 5px;
+}
+
+.adm-paydtl-status {
+  margin-left: 8px;
+  color: #2e7d32;
+  font-weight: bold;
+} */
+
+.adm-paydtl-summary {
+  width: 100%;
+  background: #f0f9f0;
+  padding: 15px 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Each row */
+.adm-paydtl-summary-row {
+  display: grid;
+  grid-template-columns: 390px 1fr;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.adm-paydtl-summary-row-inv {
+  display: grid;
+  grid-template-columns: 314px 1fr;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+/* Remove last border */
+.adm-paydtl-summary-row:last-child {
+  border-bottom: none;
+}
+
+/* Labels */
+.adm-paydtl-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+/* Normal values */
+.adm-paydtl-value {
+  font-size: 14px;
+  color: #222;
+  text-align: center;
+  word-break: break-word;
+}
+.adm-paydtl-value-inv{
+    margin-right: 10px;
+}
+
+/* Total row special */
+.adm-paydtl-total-row {
+  font-size: 15px;
+  font-weight: 700;
+  padding-bottom: 15px;
+}
+
+.adm-paydtl-label-ttl{
+    font-size: 17px;
+}
+
+/* Total amount styling */
+.adm-paydtl-total-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32;
+  text-align: center;
+  
+}
+
+/* Status styling */
+.adm-paydtl-status {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+/* Dynamic status colors */
+.adm-paydtl-status.success {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.adm-paydtl-status.failed {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.adm-paydtl-status.pending {
+  background: #fff8e1;
+  color: #f9a825;
+}
+
+/* PAYMENT HISTORY */
+.adm-paydtl-history {
+      margin-top: 30px;
+    background: #f6f9f5;
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+    padding-top: 0px;
+}
+
+.adm-paydtl-history h3{
+    text-align: center;
+     background: #2e7d32;
+}
+
+
+.adm-paydtl-history-row {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  color: black;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.adm-paydtl-plus {
+  color: green;
+  font-weight: bold;
+}

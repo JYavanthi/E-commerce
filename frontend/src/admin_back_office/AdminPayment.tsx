@@ -1,10 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./sidebar";
 import Header from "./topbar";
 import Charts from "./components/Charts";
 import "./styles/AdminPayment.css";
 
+interface Payment {
+  OrderID: number;
+  UserID: number;
+  CustomerName: string;
+  PaymentMode: string;
+  OrderDate: string;
+  TotalAmount: number;
+  PaymentStatus: string;
+  InvoiceNo: string;
+}
+
 const AdminPayment = () => {
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loading, setLoading] = useState(true);
+   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:4000/api/admin/payments")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setPayments(data.data);
+        }
+      })
+      .catch((err) => console.error("Payment fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="admin-layout">
       <Sidebar />
@@ -12,77 +40,91 @@ const AdminPayment = () => {
       <div className="admin-main">
         <Header />
 
-        {/* <div className="adm-pay-wrapper"> */}
+        {/* PAGE TITLE */}
+        <div className="adm-pay-title-row">
+          <h2 className="adm-pay-page-title">PAYMENT PAGE</h2>
+        </div>
 
-          {/* PAGE TITLE */}
-          <div className="adm-pay-title-row">
-            <h2 className="adm-pay-page-title">PAYMENT PAGE</h2>
+        <div className="adm-pay-card">
+
+          {/* Charts Section */}
+          <div className="adm-pay-charts-section">
+            <Charts />
           </div>
 
-          <div className="adm-pay-card">
+          {/* TABLE */}
+          <div className="adm-pay-table-wrapper">
+            <h3>Transactions</h3>
 
-            {/* Transactions Header */}
-            <div className="adm-pay-transactions-header">
-              {/* <button className="adm-pay-viewall-btn">
-                View All ▼
-              </button> */}
-            </div>
+            <table className="adm-pay-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer Name</th>
+                  <th>Customer ID</th>
+                  <th>Payment Mode</th>
+                  <th>Payment Date</th>
+                  <th>Total Amount</th>
+                  <th>Payment Status</th>
+                </tr>
+              </thead>
 
-            {/* Charts Section */}
-            <div className="adm-pay-charts-section">
-              <Charts />
-            </div>
-
-            {/* TABLE */}
-            <div className="adm-pay-table-wrapper">
-                <h3>Transactions</h3>
-              <table className="adm-pay-table">
-                <thead>
+              <tbody>
+                {loading ? (
                   <tr>
-                    <th>Order ID</th>
-                    <th>Customer Name</th>
-                    <th>Customer ID</th>
-                    <th>Transaction Method</th>
-                    <th>Transaction Date</th>
-                    <th>Amount Total</th>
-                    <th>Payment Status</th>
+                    <td colSpan={7} style={{ textAlign: "center" }}>
+                      Loading...
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {[1,2,3,4,5,6,7,8,9,10].map((item) => (
-                    <tr key={item}>
-                      <td>#23456</td>
-                      <td>Rakesh</td>
-                      <td>#123456</td>
-                      <td>UPI Payment</td>
-                      <td>06-Feb-2026</td>
-                      <td className="adm-pay-amount">Rs. 500</td>
+                ) : payments.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={{ textAlign: "center" }}>
+                      No payments found
+                    </td>
+                  </tr>
+                ) : (
+                  payments.map((item) => (
+                    <tr key={item.OrderID} onClick={() =>
+                    navigate(`/AdminPaymentDetails/${item.OrderID}`, {
+                      state: item,
+                    })
+                  } style={{ cursor: "pointer" }}>
+                      <td>#{item.OrderID}</td>
+                      <td>{item.CustomerName}</td>
+                      <td>#{item.UserID}</td>
+                      <td>{item.PaymentMode}</td>
                       <td>
-                        <span className="adm-pay-status completed">
-                          Completed
+                        {new Date(item.OrderDate).toLocaleDateString("en-IN")}
+                      </td>
+                      <td className="adm-pay-amount">
+                        Rs. {item.TotalAmount}
+                      </td>
+                      <td>
+                        <span
+                          className={`adm-pay-status ${item.PaymentStatus}`}
+                        >
+                          {item.PaymentStatus}
                         </span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="adm-pay-pagination">
-              <span>{"<<"}</span>
-              <span>{"<"}</span>
-              <span className="active">2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
-              <span>{">"}</span>
-              <span>{">>"}</span>
-            </div>
-
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        {/* </div> */}
+
+          {/* Pagination (Static for now) */}
+          <div className="adm-pay-pagination">
+            <span>{"<<"}</span>
+            <span>{"<"}</span>
+            <span className="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>{">"}</span>
+            <span>{">>"}</span>
+          </div>
+
+        </div>
       </div>
     </div>
   );

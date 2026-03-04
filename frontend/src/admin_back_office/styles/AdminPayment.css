@@ -22,7 +22,7 @@
   background: #f6fff2;
   padding: 25px;
   border-radius: 20px;
-  padding-top: 0px;
+  padding-top: 20px;
 }
 
 /* TRANSACTION HEADER */
@@ -165,7 +165,7 @@
 .adm-pay-table th,
 .adm-pay-table td {
   padding: 12px;
-  text-align: left;
+  text-align: center;
   font-size: 14px;
 }
 
@@ -185,10 +185,12 @@
 
 /* Status */
 .adm-pay-status {
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #c8e6c9;
+    color: green;
 }
 
 .adm-pay-status.completed {
