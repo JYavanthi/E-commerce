@@ -216,8 +216,8 @@ export default function AdminCustomerDetails({ customer }: Props) {
 
   
   const displayedOrders = showAll
-  ? orders.slice(0, 3)
-  : orders.slice(0, 1);
+  ? orders
+  : orders.slice(0,1);
 
   return (
     <div className="adm-cst-dtls-wrapper">
@@ -319,109 +319,13 @@ export default function AdminCustomerDetails({ customer }: Props) {
             </div>
           </div>
         </div>
-
-   
-  {/* <div className="adm-cst-order-section">
-  <h3>ORDER HISTORY</h3>
-
-  <div
-    style={{
-      maxHeight: showAll ? "330px" : "120px",
-      overflowY: showAll && orders.length > 3 ? "auto" : "hidden"
-    }}
-  >
-    {displayedOrders.map((order, index) => (
-      <div key={index} className="adm-cst-order-card">
-        <img
-          src="https://via.placeholder.com/100"
-          alt="product"
-          className="adm-cst-order-img"
-        />
-
-        <div className="adm-cst-order-details">
-          <h4>Order #{order.orderId}</h4>
-          <p>Total: ₹ {order.totalAmount}</p>
-          <p className="adm-cst-order-id">
-            Order ID: {order.orderId}
-          </p>
-        </div>
-
-        <div className="adm-cst-order-status">
-          <span className="adm-cst-status-badge delivered">
-            {order.orderStatus}
-          </span>
-          <p className="adm-cst-delivery-date">
-            {order.expectedDelivery}
-          </p>
-        </div>
-      </div>
-    ))}
-
-  
-    {showAll && orders.length <= 1 && (
-      <p style={{ fontSize: "13px", marginTop: "10px", color: "#777" }}>
-        No more orders found
-      </p>
-    )}
-  </div>
-
- 
-  {orders.length >= 1 && (
-    <p
-      style={{
-        cursor: "pointer",
-        marginTop: "10px",
-        fontWeight: 500,
-        color: "#2e7d32"
-      }}
-      onClick={() => setShowAll(!showAll)}
-    >
-      {showAll ? "See Less" : "See All"}
-    </p>
-  )}
-</div>
-
-     
-<div className="adm-cst-wishlist-section">
-  <h3>WISHLIST</h3>
-
-  {wishlist.length === 0 ? (
-    <p
-      style={{
-        fontSize: "14px",
-        color: "#777",
-        marginTop: "10px"
-      }}
-    >
-      No wishlist products found
-    </p>
-  ) : (
-    wishlist.map((item, index) => (
-      <div key={index} className="adm-cst-wishlist-card">
-        <img
-          src={item.ImageUrl}
-          alt={item.ProductName}
-          className="adm-cst-wishlist-img"
-        />
-
-        <div className="adm-cst-wishlist-details">
-          <h4>{item.ProductName}</h4>
-          <p>₹ {item.Price}</p>
-        </div>
-      </div>
-    ))
-  )}
-</div> */}
 {/* ================= ORDER HISTORY ================= */}
 <div className="adm-cst-order-section">
   <h3>ORDER HISTORY</h3>
 
-  <div
-    className={`adm-cst-order-container
-         ${showAll ? "show-all" : ""} 
-    ${expandedOrderId ? "expanded" : ""}
-       `}
-  >
+  
+
+  <div className={`adm-cst-order-container ${showAll ? "show-all" : ""}`}>
     {displayedOrders.map((order, index) => (
       <div key={index} className="adm-cst-order-card">
 
@@ -435,12 +339,27 @@ export default function AdminCustomerDetails({ customer }: Props) {
 
           <div className="adm-cst-order-details">
             <h4>Order ID : <span>#{order.orderId}</span></h4>
-            <p>Total: ₹ {order.totalAmount}</p>
-            {/* <p className="adm-cst-order-id">
-              Order ID: {order.orderId}
-            </p> */}
+            <p>Total : ₹ {order.totalAmount}</p> 
+            <p className="adm-cst-delivery-date">
+              Date : <span className="ord-dte">{order.expectedDelivery}</span>
+            </p>
 
-            <p
+            {/* <p
+              className="adm-cst-view-more"
+              onClick={() =>
+                setExpandedOrderId(
+                  expandedOrderId === order.orderId
+                    ? null
+                    : order.orderId
+                )
+              }
+            >
+              {expandedOrderId === order.orderId
+                ? "Hide Details"
+                : "View More Details"}
+            </p> */}
+          </div>
+          <p
               className="adm-cst-view-more"
               onClick={() =>
                 setExpandedOrderId(
@@ -454,15 +373,15 @@ export default function AdminCustomerDetails({ customer }: Props) {
                 ? "Hide Details"
                 : "View More Details"}
             </p>
-          </div>
 
           <div className="adm-cst-order-status">
-            <span className="adm-cst-status-badge delivered">
+           <h2>ORDER STATUS  :  <span className="adm-cst-status-badge delivered">
               {order.orderStatus}
-            </span>
-            <p className="adm-cst-delivery-date">
-              {order.expectedDelivery}
-            </p>
+            </span></h2>
+            <h2>PAYMENT STATUS  :  <span className="adm-cst-status-badge delivered">
+              {order.paymentStatus}
+            </span></h2>
+            
           </div>
         </div>
 
@@ -493,9 +412,28 @@ export default function AdminCustomerDetails({ customer }: Props) {
               </tbody>
             </table>
 
-            <div className="adm-cst-order-total">
-              Total Amount: ₹ {order.totalAmount}
-            </div>
+           
+          <div className="adm-cst-order-total">
+
+  <div className="adm-coupon-section">
+    {order.couponCode && (
+      <h3>
+        Coupon :
+        <span style={{ color: "#2e7d32" }}>
+          {order.couponCode}
+        </span>
+        {" "}
+        (- ₹{order.couponDiscount})
+      </h3>
+    )}
+  </div>
+
+  <h3 className="adm-total-section">
+    Total Amount :
+    <span > ₹ {order.totalAmount}</span>
+  </h3>
+
+</div>
           </div>
         )}
       </div>
@@ -508,7 +446,7 @@ export default function AdminCustomerDetails({ customer }: Props) {
     )}
   </div>
 
-  {orders.length >= 1 && (
+  {orders.length >=1 && (
     <p
       className="adm-cst-toggle"
       onClick={() => setShowAll(!showAll)}
