@@ -3300,12 +3300,24 @@ ${shippingAddress.state || ""} - ${shippingAddress.pincode || ""}
        5️⃣ CLEAR USER CART
     ========================= */
 
-    await new sql.Request(transaction)
-      .input("UserID", sql.Int, userId)
-      .query(`
-        DELETE FROM Cart
-        WHERE UserID = @UserID
-      `);
+    // await new sql.Request(transaction)
+    //   .input("UserID", sql.Int, userId)
+    //   .query(`
+    //     DELETE FROM Cart
+    //     WHERE UserID = @UserID
+    //   `);
+    /* =========================
+   5️⃣ CLEAR USER CART (ONLY FOR COD)
+========================= */
+
+if (paymentMode === "COD") {
+  await new sql.Request(transaction)
+    .input("UserID", sql.Int, userId)
+    .query(`
+      DELETE FROM Cart
+      WHERE UserID = @UserID
+    `);
+}
 
     await transaction.commit();
 
@@ -3793,7 +3805,7 @@ app.post("/api/payment/create", async (req, res) => {
       merchantTransactionId: merchantTxnId,
       merchantUserId: "USER001",
       amount: amount * 100,
-      redirectUrl: "http://localhost:5173",
+      redirectUrl: "http://localhost:5173/payment",
       redirectMode: "GET",
       callbackUrl: "http://localhost:4000/api/payment/callback",
       paymentInstrument: { type: "PAY_PAGE"}
