@@ -391,7 +391,188 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
+// app.put("/api/users/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params;
+
+//     const {
+//       FirstName,
+//       LastName,
+//       Email,
+//       ContactNo,
+//       DOB,
+//       Gender,
+//       PasswordHash
+//     } = req.body;
+
+//     const pool = await sql.connect(dbConfig);
+
+//     // 🔍 CHECK if another user already has same email/phone
+//     const existingUser = await pool.request()
+//       .input("Email", sql.NVarChar, Email)
+//       .input("ContactNo", sql.NVarChar, ContactNo)
+//       .input("UserID", sql.Int, id)
+//       .query(`
+//         SELECT TOP 1 *
+//         FROM UserMaster
+//         WHERE (Email = @Email OR ContactNo = @ContactNo)
+//         AND UserID != @UserID
+//       `);
+
+//     if (existingUser.recordset.length > 0) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "Email or phone already used by another account"
+//       });
+//     }
+
+//     // ✅ UPDATE USER
+//     await pool.request()
+//       .input("UserID", sql.Int, id)
+//       .input("FirstName", sql.NVarChar, FirstName)
+//       .input("LastName", sql.NVarChar, LastName)
+//       .input("Email", sql.NVarChar, Email)
+//       .input("ContactNo", sql.NVarChar, ContactNo)
+//       .input("DOB", sql.Date, DOB)
+//       .input("Gender", sql.NVarChar, Gender)
+//       .input("PasswordHash", sql.NVarChar, PasswordHash || null)
+//       .query(`
+//         UPDATE UserMaster
+//         SET FirstName = @FirstName,
+//             LastName = @LastName,
+//             Email = @Email,
+//             ContactNo = @ContactNo,
+//             DOB = @DOB,
+//             Gender = @Gender,
+//             PasswordHash = ISNULL(@PasswordHash, PasswordHash),
+//             UpdatedDt = GETDATE()
+//         WHERE UserID = @UserID
+//       `);
+
+//     res.json({
+//       success: true,
+//       message: "Profile updated successfully"
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Update error:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Update failed",
+//       error: error.message
+//     });
+//   }
+// });
+
 //untouched
+
+app.put("/api/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      FirstName,
+      LastName,
+      Email,
+      ContactNo,
+      DOB,
+      Gender,
+      PasswordHash
+    } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    /* =========================
+       VALIDATION
+    ========================= */
+
+    if (!FirstName || !Email || !ContactNo) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing"
+      });
+    }
+
+    /* =========================
+       DUPLICATE CHECK (IMPORTANT FIX)
+    ========================= */
+
+    const existingUser = await pool.request()
+      .input("Email", sql.NVarChar, Email)
+      .input("ContactNo", sql.NVarChar, ContactNo)
+      .input("UserID", sql.Int, id)
+      .query(`
+        SELECT TOP 1 UserID
+        FROM UserMaster
+        WHERE (Email = @Email OR ContactNo = @ContactNo)
+        AND UserID != @UserID
+      `);
+
+    if (existingUser.recordset.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "Email or phone already used by another account"
+      });
+    }
+
+    /* =========================
+       UPDATE USER
+    ========================= */
+
+    await pool.request()
+      .input("UserID", sql.Int, id)
+      .input("FirstName", sql.NVarChar, FirstName)
+      .input("LastName", sql.NVarChar, LastName || "")
+      .input("Email", sql.NVarChar, Email)
+      .input("ContactNo", sql.NVarChar, ContactNo)
+      .input("DOB", sql.Date, DOB || null)
+      .input("Gender", sql.NVarChar, Gender || null)
+      .input("PasswordHash", sql.NVarChar, PasswordHash || null)
+      .query(`
+        UPDATE UserMaster
+        SET FirstName = @FirstName,
+            LastName = @LastName,
+            Email = @Email,
+            ContactNo = @ContactNo,
+            DOB = @DOB,
+            Gender = @Gender,
+            PasswordHash = CASE 
+                              WHEN @PasswordHash IS NULL OR @PasswordHash = '' 
+                              THEN PasswordHash 
+                              ELSE @PasswordHash 
+                           END
+            
+        WHERE UserID = @UserID
+      `);
+
+    /* =========================
+       RETURN UPDATED USER (🔥 NEW)
+    ========================= */
+
+    const updatedUser = await pool.request()
+      .input("UserID", sql.Int, id)
+      .query(`
+        SELECT UserID, FirstName, Email, ContactNo
+        FROM UserMaster
+        WHERE UserID = @UserID
+      `);
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser.recordset[0] // 🔥 send updated data
+    });
+
+  } catch (error) {
+    console.error("❌ Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Update failed",
+      error: error.message
+    });
+  }
+});
+
 app.get("/api/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -650,9 +831,10 @@ app.get("/api/products", async (req, res) => {
         p.ProductID,
         p.ProductName,
         p.ProductDescription,
-        p.Quantity AS ProductWeight,
+        p.ProductWeight AS ProductWeight,
         c.CategoryName,
         ISNULL(pp.Price, 0) AS Price,
+      
 
         (
           SELECT TOP 1 AttachmentFile
@@ -681,6 +863,7 @@ app.get("/api/products", async (req, res) => {
       ProductWeight: item.ProductWeight,
       CategoryName: item.CategoryName,
       Price: item.Price,
+      // DiscountPrice:item.DiscountPrice,
       ImageUrl: item.ImageUrl
         ? `http://localhost:4000${item.ImageUrl}`
         : null
@@ -946,6 +1129,7 @@ app.get("/api/products/:id", async (req, res) => {
 //     });
 //   }
 // });
+
 app.post("/api/products", async (req, res) => {
   try {
     const {
@@ -1026,6 +1210,95 @@ app.post("/api/products", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to create product",
+      error: error.message
+    });
+  }
+});
+
+app.put("/api/products/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      ProductCategoryID,
+      ProductName,
+      ProductDescription,
+      Quantity,
+      SKU,
+      Status,
+      ProductWeight
+    } = req.body;
+
+    if (!ProductCategoryID || !ProductName) {
+      return res.status(400).json({
+        success: false,
+        message: "ProductCategoryID and ProductName are required"
+      });
+    }
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("ProductID", sql.Int, id)
+      .input("ProductCategoryID", sql.Int, ProductCategoryID)
+      .input("ProductName", sql.NVarChar(200), ProductName)
+      .input("ProductDescription", sql.NVarChar(sql.MAX), ProductDescription ?? "")
+      .input("Quantity", sql.Int, Quantity ?? 0)
+      .input("SKU", sql.NVarChar(100), SKU ?? "")
+      .input("Status", sql.Bit, Status ?? 1)
+      .input("ProductWeight", sql.NVarChar(50), ProductWeight ?? "")
+      .query(`
+        UPDATE ProductMaster
+        SET
+          ProductCategoryID = @ProductCategoryID,
+          ProductName = @ProductName,
+          ProductDescription = @ProductDescription,
+          Quantity = @Quantity,
+          SKU = @SKU,
+          Status = @Status,
+          ProductWeight = @ProductWeight
+        WHERE ProductID = @ProductID
+      `);
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully"
+    });
+
+  } catch (error) {
+    console.error("❌ UPDATE PRODUCT ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update product",
+      error: error.message
+    });
+  }
+});
+
+app.delete("/api/products/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("ProductID", sql.Int, id)
+      .query(`
+        UPDATE ProductMaster
+        SET Status = 0
+        WHERE ProductID = @ProductID
+      `);
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("❌ DELETE PRODUCT ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete product",
       error: error.message
     });
   }
@@ -1347,6 +1620,8 @@ app.get("/api/product-prices", async (req, res) => {
 //     });
 //   }
 // });
+
+
 app.post("/api/product-prices", async (req, res) => {
   try {
     const {
@@ -1416,6 +1691,58 @@ app.post("/api/product-prices", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to create product price",
+      error: error.message
+    });
+  }
+});
+
+app.put("/api/product-prices/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const {
+      Price,
+      DiscountPrice
+    } = req.body;
+
+    if (Price === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Price is required"
+      });
+    }
+
+    if (DiscountPrice && DiscountPrice > Price) {
+      return res.status(400).json({
+        success: false,
+        message: "DiscountPrice cannot be greater than Price"
+      });
+    }
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("ProductID", sql.Int, productId)
+      .input("Price", sql.Decimal(10,2), Price)
+      .input("DiscountPrice", sql.Decimal(10,2), DiscountPrice ?? null)
+      .query(`
+        UPDATE ProductPriceMaster
+        SET
+          Price = @Price,
+          DiscountPrice = @DiscountPrice
+        WHERE ProductID = @ProductID
+      `);
+
+    res.status(200).json({
+      success: true,
+      message: "Price updated successfully"
+    });
+
+  } catch (error) {
+    console.error("❌ UPDATE PRICE ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update price",
       error: error.message
     });
   }
@@ -1587,6 +1914,7 @@ app.get("/api/cart/:userId", async (req, res) => {
           p.ProductName,
           p.ProductWeight AS ProductWeight,
           pp.Price,
+          pp.DiscountPrice,
 
           (
             SELECT TOP 1 AttachmentFile
@@ -1612,6 +1940,7 @@ app.get("/api/cart/:userId", async (req, res) => {
       ProductWeight: item.ProductWeight,
       Quantity: item.Quantity,
       Price: item.Price,
+      DiscountPrice:item.DiscountPrice,
       ImageUrl: item.ImageUrl
         ? `http://localhost:4000${item.ImageUrl}`
         : null
@@ -2409,6 +2738,245 @@ const SALT_INDEX = "1";
 //   }
 // });
 
+
+
+// app.post("/api/order/create", async (req, res) => {
+//   const transaction = new sql.Transaction();
+
+//   try {
+//     const {
+//       userId,
+//       cartItems,
+//       subTotalAmount,
+//       discountAmount,
+//       couponDiscount,
+//       couponCode,
+//       totalAmount,
+//       taxAmount,
+//       paymentMode,
+//       shippingAddress
+//     } = req.body;
+
+//     if (!userId) {
+//       return res.status(400).json({ message: "UserId is required" });
+//     }
+
+//     if (!cartItems || cartItems.length === 0) {
+//       return res.status(400).json({ message: "Cart is empty" });
+//     }
+
+//     if (!shippingAddress) {
+//       return res.status(400).json({ message: "Shipping address required" });
+//     }
+
+//     await transaction.begin();
+
+//     const request = new sql.Request(transaction);
+
+//     /* =========================
+//        1️⃣ CREATE ORDER MASTER
+//     ========================= */
+
+//     const orderResult = await request
+//       .input("UserID", sql.Int, userId)
+//       .input("SubTotalAmount", sql.Decimal(10, 2), subTotalAmount)
+//       .input("DiscountAmount", sql.Decimal(10, 2), discountAmount || 0)
+//       .input("CouponCode", sql.NVarChar(50), couponCode)
+//       .input("CouponDiscount", sql.Decimal(10, 2), couponDiscount || 0)
+//       .input("TotalAmount", sql.Decimal(10, 2), totalAmount)
+//       .input("TaxAmount", sql.Decimal(10, 2), taxAmount)
+//       .input("PaymentMode", sql.VarChar(20), paymentMode || "COD")
+//       .input("PaymentStatus", sql.VarChar(20), "SUCCESS")
+//       .input("OrderStatus", sql.VarChar(20), "CONFIRMED")
+//       .input("CreatedBy", sql.Int, userId)
+//       .query(`
+//         INSERT INTO OrderMaster
+//         (
+//           UserID,
+//           OrderDate,
+//           SubTotalAmount,
+//           DiscountAmount,
+//           CouponCode,
+//       CouponDiscount,
+//           TotalAmount,
+//           TaxAmount,
+//           PaymentMode,
+//           PaymentStatus,
+//           OrderStatus,
+//           CreatedBy,
+//           CreatedDt
+//         )
+//         OUTPUT INSERTED.OrderID
+//         VALUES
+//         (
+//           @UserID,
+//           GETDATE(),
+//           @SubTotalAmount,
+//           @DiscountAmount,
+//            @CouponCode,
+//       @CouponDiscount,
+//           @TotalAmount,
+//           @TaxAmount,
+//           @PaymentMode,
+//           @PaymentStatus,
+//           @OrderStatus,
+//           @CreatedBy,
+//           GETDATE()
+//         )
+//       `);
+
+//     const orderId = orderResult.recordset[0].OrderID;
+
+//     /* =========================
+//        2️⃣ INSERT ORDER DETAILS
+//     ========================= */
+
+//     for (const item of cartItems) {
+//       const unitPrice = item.unitPrice;
+//       const quantity = item.quantity;
+//       const totalPrice = unitPrice * quantity;
+
+//       await new sql.Request(transaction)
+//         .input("OrderID", sql.Int, orderId)
+//         .input("ProductID", sql.Int, item.productId)
+//         .input("Quantity", sql.Int, quantity)
+//         .input("UnitPrice", sql.Decimal(10, 2), unitPrice)
+//         .input("TotalPrice", sql.Decimal(10, 2), totalPrice)
+//         .input("CreatedBy", sql.Int, userId)
+//         .query(`
+//           INSERT INTO OrderDetails
+//           (OrderID, ProductID, Quantity, UnitPrice, TotalPrice, CreatedBy, CreatedDt)
+//           VALUES
+//           (@OrderID, @ProductID, @Quantity, @UnitPrice, @TotalPrice, @CreatedBy, GETDATE())
+//         `);
+//     }
+
+//     /* =========================
+//        3️⃣ CREATE DELIVERY
+//     ========================= */
+
+//     const expectedDate = new Date();
+//     expectedDate.setDate(expectedDate.getDate() + 5);
+
+//     const cityAddress = `
+// ${shippingAddress.city},
+// ${shippingAddress.state} - ${shippingAddress.pincode}
+// `;
+
+//     const fullAddress = `
+// ${shippingAddress.name}
+// Ph: ${shippingAddress.mobile}
+// No ${shippingAddress.flat},
+// ${shippingAddress.street},
+// ${shippingAddress.landmark || ""}
+// ${shippingAddress.city},
+// ${shippingAddress.state} - ${shippingAddress.pincode}
+// `;
+
+//     await new sql.Request(transaction)
+//       .input("OrderID", sql.Int, orderId)
+//       .input("UserID", sql.Int, userId)
+//       .input("ShippingMode", sql.VarChar(50), "STANDARD")
+//       .input("FromLocation", sql.VarChar(100), "Main Warehouse")
+//       .input("ToLocation", sql.NVarChar(500), cityAddress)
+//       .input("DeliveryStatus", sql.VarChar(50), "ORDER_CONFIRMED")
+//       .input("ExpectedDeliveryDate", sql.DateTime, expectedDate)
+//       .input("CreatedBy", sql.Int, userId)
+//       .query(`
+//         INSERT INTO Delivery
+//         (
+//           OrderID,
+//           UserID,
+//           ShippingMode,
+//           FromLocation,
+//           ToLocation,
+//           DeliveryStatus,
+//           ExpectedDeliveryDate,
+//           CreatedBy,
+//           CreatedDt
+//         )
+//         VALUES
+//         (
+//           @OrderID,
+//           @UserID,
+//           @ShippingMode,
+//           @FromLocation,
+//           @ToLocation,
+//           @DeliveryStatus,
+//           @ExpectedDeliveryDate,
+//           @CreatedBy,
+//           GETDATE()
+//         )
+//       `);
+
+//     /* =========================
+//        4️⃣ GENERATE INVOICE
+//     ========================= */
+
+//     const InvoiceNo = `${Date.now()}-${orderId}`;
+
+//     await generateInvoice({
+//       InvoiceNo,
+//       orderId,
+//       userId,
+//       shippingAddress: fullAddress,
+//       items: cartItems.map(item => ({
+//         name: item.productName || `Product ${item.productId}`,
+//         quantity: item.quantity,
+//         unitPrice: item.unitPrice,
+//         total: item.unitPrice * item.quantity
+//       })),
+//       subtotal: subTotalAmount,
+//       discount: discountAmount || 0,
+//       tax: taxAmount,
+//       totalAmount
+//     });
+
+//     await new sql.Request(transaction)
+//       .input("OrderID", sql.Int, orderId)
+//       .input("InvoiceNo", sql.VarChar(50), InvoiceNo)
+//       .query(`
+//         UPDATE OrderMaster
+//         SET InvoiceNo = @InvoiceNo
+//         WHERE OrderID = @OrderID
+//       `);
+
+//       /* =========================
+//    5️⃣ CLEAR USER CART
+// ========================= */
+
+// await new sql.Request(transaction)
+//   .input("UserID", sql.Int, userId)
+//   .query(`
+//     DELETE FROM Cart
+//     WHERE UserID = @UserID
+//   `);
+
+//     await transaction.commit();
+
+//     res.json({
+//       success: true,
+//       orderId,
+//       invoiceUrl: `http://localhost:4000/api/order/${orderId}/invoice`,
+//       message: "Order + Delivery + Invoice created successfully"
+//     });
+
+//   } catch (err) {
+
+//     if (transaction) {
+//       await transaction.rollback();
+//     }
+
+//     console.error("❌ ORDER CREATE ERROR:", err);
+
+//     res.status(500).json({
+//       message: "Order creation failed",
+//       error: err.message
+//     });
+//   }
+// });
+
+
 app.post("/api/order/create", async (req, res) => {
   const transaction = new sql.Transaction();
 
@@ -2416,6 +2984,10 @@ app.post("/api/order/create", async (req, res) => {
     const {
       userId,
       cartItems,
+      subTotalAmount,
+      discountAmount,
+      couponDiscount,
+      couponCode,
       totalAmount,
       taxAmount,
       paymentMode,
@@ -2423,23 +2995,125 @@ app.post("/api/order/create", async (req, res) => {
     } = req.body;
 
     if (!userId) {
-      return res.status(400).json({ message: "UserId is required" });
+      return res.status(400).json({
+        success: false,
+        message: "UserId is required"
+      });
     }
 
     if (!cartItems || cartItems.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
+      return res.status(400).json({
+        success: false,
+        message: "Cart is empty"
+      });
     }
 
     if (!shippingAddress) {
-      return res.status(400).json({ message: "Shipping address required" });
+      return res.status(400).json({
+        success: false,
+        message: "Shipping address required"
+      });
     }
 
-    // ==============================
-    // BEGIN TRANSACTION
-    // ==============================
     await transaction.begin();
 
     const request = new sql.Request(transaction);
+
+    /* =========================
+       0️⃣ GET USER DETAILS
+    ========================= */
+
+    const userResult = await new sql.Request(transaction)
+      .input("UserID", sql.Int, userId)
+      .query(`
+        SELECT TOP 1
+          UserID,
+          FirstName,
+          LastName
+        FROM UserMaster
+        WHERE UserID = @UserID
+      `);
+
+    if (userResult.recordset.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const user = userResult.recordset[0];
+
+    const userDisplayName =
+      `${user.FirstName || ""} ${user.LastName || ""}`.trim() || "Customer";
+
+    /* =========================
+       0️⃣ GET DEFAULT BILLING ADDRESS
+    ========================= */
+
+    const defaultAddressResult = await new sql.Request(transaction)
+      .input("UserID", sql.Int, userId)
+      .query(`
+        SELECT TOP 1
+          AddressID,
+          UserID,
+          FullName,
+          MobileNumber,
+          AddressLine1,
+          AddressLine2,
+          Landmark,
+          City,
+          State,
+          Country,
+          Pincode,
+          AddressType,
+          IsDefault
+        FROM Address
+        WHERE UserID = @UserID
+          AND IsDefault = 1
+        ORDER BY AddressID DESC
+      `);
+
+    const defaultAddress = defaultAddressResult.recordset[0] || null;
+
+    const billingName =  userDisplayName;
+
+    const billingAddress = defaultAddress
+      ? [
+          defaultAddress.AddressLine1 || "",
+          defaultAddress.AddressLine2 || "",
+          defaultAddress.Landmark || "",
+          defaultAddress.City || "",
+          defaultAddress.State || "",
+          defaultAddress.Country || "",
+          defaultAddress.Pincode || ""
+        ]
+          .filter(Boolean)
+          .join(", ")
+      : "N/A";
+
+    /* =========================
+       SHIPPING DETAILS
+    ========================= */
+
+    const shippingName = shippingAddress.name || billingName;
+
+    const shippingAddressText = [
+      shippingAddress.flat || "",
+      shippingAddress.street || "",
+      shippingAddress.landmark || "",
+      shippingAddress.city || "",
+      shippingAddress.state || "",
+      shippingAddress.pincode || ""
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    const fullAddress = `
+${shippingName}
+Ph: ${shippingAddress.mobile || ""}
+${shippingAddress.flat || ""}
+${shippingAddress.street || ""}
+${shippingAddress.landmark || ""}
+${shippingAddress.city || ""}
+${shippingAddress.state || ""} - ${shippingAddress.pincode || ""}
+`.trim();
 
     /* =========================
        1️⃣ CREATE ORDER MASTER
@@ -2447,8 +3121,12 @@ app.post("/api/order/create", async (req, res) => {
 
     const orderResult = await request
       .input("UserID", sql.Int, userId)
+      .input("SubTotalAmount", sql.Decimal(10, 2), subTotalAmount)
+      .input("DiscountAmount", sql.Decimal(10, 2), discountAmount || 0)
+      .input("CouponCode", sql.NVarChar(50), couponCode || null)
+      .input("CouponDiscount", sql.Decimal(10, 2), couponDiscount || 0)
       .input("TotalAmount", sql.Decimal(10, 2), totalAmount)
-      .input("TaxAmount", sql.Decimal(10, 2), taxAmount)
+      .input("TaxAmount", sql.Decimal(10, 2), taxAmount || 0)
       .input("PaymentMode", sql.VarChar(20), paymentMode || "COD")
       .input("PaymentStatus", sql.VarChar(20), "SUCCESS")
       .input("OrderStatus", sql.VarChar(20), "CONFIRMED")
@@ -2458,6 +3136,10 @@ app.post("/api/order/create", async (req, res) => {
         (
           UserID,
           OrderDate,
+          SubTotalAmount,
+          DiscountAmount,
+          CouponCode,
+          CouponDiscount,
           TotalAmount,
           TaxAmount,
           PaymentMode,
@@ -2471,6 +3153,10 @@ app.post("/api/order/create", async (req, res) => {
         (
           @UserID,
           GETDATE(),
+          @SubTotalAmount,
+          @DiscountAmount,
+          @CouponCode,
+          @CouponDiscount,
           @TotalAmount,
           @TaxAmount,
           @PaymentMode,
@@ -2490,7 +3176,7 @@ app.post("/api/order/create", async (req, res) => {
     for (const item of cartItems) {
       const unitPrice = item.unitPrice;
       const quantity = item.quantity;
-      const totalPrice = unitPrice * quantity;
+      const totalPrice = item.totalPrice || unitPrice * quantity;
 
       await new sql.Request(transaction)
         .input("OrderID", sql.Int, orderId)
@@ -2501,9 +3187,25 @@ app.post("/api/order/create", async (req, res) => {
         .input("CreatedBy", sql.Int, userId)
         .query(`
           INSERT INTO OrderDetails
-          (OrderID, ProductID, Quantity, UnitPrice, TotalPrice, CreatedBy, CreatedDt)
+          (
+            OrderID,
+            ProductID,
+            Quantity,
+            UnitPrice,
+            TotalPrice,
+            CreatedBy,
+            CreatedDt
+          )
           VALUES
-          (@OrderID, @ProductID, @Quantity, @UnitPrice, @TotalPrice, @CreatedBy, GETDATE())
+          (
+            @OrderID,
+            @ProductID,
+            @Quantity,
+            @UnitPrice,
+            @TotalPrice,
+            @CreatedBy,
+            GETDATE()
+          )
         `);
     }
 
@@ -2515,18 +3217,9 @@ app.post("/api/order/create", async (req, res) => {
     expectedDate.setDate(expectedDate.getDate() + 5);
 
     const cityAddress = `
-${shippingAddress.city},
-${shippingAddress.state} - ${shippingAddress.pincode}
-`;
-       const fullAddress = `
-${shippingAddress.name}
-Ph: ${shippingAddress.mobile}
-No ${shippingAddress.flat},
-${shippingAddress.street},
-${shippingAddress.landmark || ""}
-${shippingAddress.city},
-${shippingAddress.state} - ${shippingAddress.pincode}
-`;
+${shippingAddress.city || ""},
+${shippingAddress.state || ""} - ${shippingAddress.pincode || ""}
+`.trim();
 
     await new sql.Request(transaction)
       .input("OrderID", sql.Int, orderId)
@@ -2568,24 +3261,52 @@ ${shippingAddress.state} - ${shippingAddress.pincode}
        4️⃣ GENERATE INVOICE
     ========================= */
 
+    const InvoiceNo = `${Date.now()}-${orderId}`;
+
     await generateInvoice({
+      InvoiceNo,
       orderId,
       userId,
-      shippingAddress: fullAddress,
+
+      billingName,
+      billingAddress,
+
+      shippingName,
+      shippingAddress: shippingAddressText,
+
       items: cartItems.map(item => ({
         name: item.productName || `Product ${item.productId}`,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
-        total: item.unitPrice * item.quantity
+        total: item.totalPrice || (item.unitPrice * item.quantity)
       })),
-      subtotal: totalAmount - taxAmount,
-      tax: taxAmount,
+
+      subtotal: subTotalAmount,
+      discount: (discountAmount || 0) + (couponDiscount || 0),
+      tax: taxAmount || 0,
       totalAmount
     });
 
-    // ==============================
-    // COMMIT TRANSACTION
-    // ==============================
+    await new sql.Request(transaction)
+      .input("OrderID", sql.Int, orderId)
+      .input("InvoiceNo", sql.VarChar(50), InvoiceNo)
+      .query(`
+        UPDATE OrderMaster
+        SET InvoiceNo = @InvoiceNo
+        WHERE OrderID = @OrderID
+      `);
+
+    /* =========================
+       5️⃣ CLEAR USER CART
+    ========================= */
+
+    await new sql.Request(transaction)
+      .input("UserID", sql.Int, userId)
+      .query(`
+        DELETE FROM Cart
+        WHERE UserID = @UserID
+      `);
+
     await transaction.commit();
 
     res.json({
@@ -2596,10 +3317,6 @@ ${shippingAddress.state} - ${shippingAddress.pincode}
     });
 
   } catch (err) {
-
-    // ==============================
-    // ROLLBACK IF ERROR
-    // ==============================
     if (transaction) {
       await transaction.rollback();
     }
@@ -2607,97 +3324,97 @@ ${shippingAddress.state} - ${shippingAddress.pincode}
     console.error("❌ ORDER CREATE ERROR:", err);
 
     res.status(500).json({
+      success: false,
       message: "Order creation failed",
       error: err.message
     });
   }
 });
 
-app.get("/api/order/:orderId", async (req, res) => {
-  try {
-    const { orderId } = req.params;
 
-    const pool = await sql.connect(dbConfig);
+// app.get("/api/order/:orderId", async (req, res) => {
+//   try {
+//     const { orderId } = req.params;
 
-    /* 1️⃣ ORDER MASTER */
-    const orderResult = await pool.request()
-      .input("OrderID", sql.Int, orderId)
-      .query(`
-        SELECT 
-          o.OrderID,
-          o.OrderDate,
-          o.TotalAmount,
-          o.TaxAmount,
-          o.PaymentMode,
-          o.PaymentStatus,
-          o.OrderStatus
-        FROM OrderMaster o
-        WHERE o.OrderID = @OrderID
-      `);
+//     const pool = await sql.connect(dbConfig);
 
-    if (orderResult.recordset.length === 0) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+//     /* 1️⃣ ORDER MASTER */
+//     const orderResult = await pool.request()
+//       .input("OrderID", sql.Int, orderId)
+//       .query(`
+//         SELECT 
+//           o.OrderID,
+//           o.OrderDate,
+//           o.TotalAmount,
+//           o.TaxAmount,
+//           o.PaymentMode,
+//           o.PaymentStatus,
+//           o.OrderStatus
+//         FROM OrderMaster o
+//         WHERE o.OrderID = @OrderID
+//       `);
 
-    const order = orderResult.recordset[0];
+//     if (orderResult.recordset.length === 0) {
+//       return res.status(404).json({ message: "Order not found" });
+//     }
 
-    /* 2️⃣ ORDER ITEMS WITH IMAGE */
-    const itemsResult = await pool.request()
-      .input("OrderID", sql.Int, orderId)
-      .query(`
-        SELECT 
-          p.ProductName,
-          p.ProductWeight AS ProductWeight,
-          od.Quantity,
-          od.UnitPrice,
-          od.TotalPrice,
+//     const order = orderResult.recordset[0];
 
-          (
-            SELECT TOP 1 AttachmentFile
-            FROM Attachments a
-            WHERE a.ProductID = p.ProductID
-            ORDER BY a.SortOrder ASC
-          ) AS ImageUrl
+//     /* 2️⃣ ORDER ITEMS WITH IMAGE */
+//     const itemsResult = await pool.request()
+//       .input("OrderID", sql.Int, orderId)
+//       .query(`
+//         SELECT 
+//           p.ProductName,
+//           p.ProductWeight AS ProductWeight,
+//           od.Quantity,
+//           od.UnitPrice,
+//           od.TotalPrice,
 
-        FROM OrderDetails od
-        JOIN ProductMaster p 
-          ON od.ProductID = p.ProductID
-        WHERE od.OrderID = @OrderID
-      `);
+//           (
+//             SELECT TOP 1 AttachmentFile
+//             FROM Attachments a
+//             WHERE a.ProductID = p.ProductID
+//             ORDER BY a.SortOrder ASC
+//           ) AS ImageUrl
 
-    const items = itemsResult.recordset.map(item => ({
-      productName: item.ProductName,
-      weight: item.ProductWeight || "",
-      qty: item.Quantity,
-      price: item.TotalPrice,
-      imageUrl: item.ImageUrl
-        ? `http://localhost:4000${item.ImageUrl}`
-        : null
-    }));
+//         FROM OrderDetails od
+//         JOIN ProductMaster p 
+//           ON od.ProductID = p.ProductID
+//         WHERE od.OrderID = @OrderID
+//       `);
 
-    /* 3️⃣ FINAL RESPONSE */
-    res.json({
-      orderId: order.OrderID,
-      transactionDate: new Date(order.OrderDate).toDateString(),
-      paymentMethod: order.PaymentMode,
-      shippingMethod: "Shiprocket",
-      subtotal: order.TotalAmount,
-      gst: order.TaxAmount,
-      shipping: 40,
-      total: order.TotalAmount + order.TaxAmount + 40,
-      items
-    });
+//     const items = itemsResult.recordset.map(item => ({
+//       productName: item.ProductName,
+//       weight: item.ProductWeight || "",
+//       qty: item.Quantity,
+//       price: item.TotalPrice,
+//       imageUrl: item.ImageUrl
+//         ? `http://localhost:4000${item.ImageUrl}`
+//         : null
+//     }));
 
-  } catch (err) {
-    console.error("❌ ORDER FETCH ERROR:", err);
-    res.status(500).json({
-      message: "Failed to fetch order",
-      error: err.message
-    });
-  }
-});
+//     /* 3️⃣ FINAL RESPONSE */
+//     res.json({
+//       orderId: order.OrderID,
+//       transactionDate: new Date(order.OrderDate).toDateString(),
+//       paymentMethod: order.PaymentMode,
+//       shippingMethod: "Shiprocket",
+//       subtotal: order.TotalAmount,
+//       gst: order.TaxAmount,
+//       shipping: "FREE",
+//       total: order.TotalAmount + order.TaxAmount ,
+//       items
+//     });
 
-
+//   } catch (err) {
+//     console.error("❌ ORDER FETCH ERROR:", err);
+//     res.status(500).json({
+//       message: "Failed to fetch order",
+//       error: err.message
+//     });
+//   }
+// });
 
 //getting the order details to post it in myorders page
 // app.get("/api/orders/user/:userId", async (req, res) => {
@@ -2762,8 +3479,200 @@ app.get("/api/order/:orderId", async (req, res) => {
 //   }
 // });
 
+app.get("/api/order/:orderId", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const pool = await sql.connect(dbConfig);
+
+    /* 1️⃣ ORDER MASTER */
+
+    const orderResult = await pool.request()
+      .input("OrderID", sql.Int, orderId)
+      .query(`
+        SELECT 
+          o.OrderID,
+          o.OrderDate,
+          o.SubTotalAmount,
+          o.DiscountAmount,
+          o.CouponDiscount,
+          o.TotalAmount,
+          o.TaxAmount,
+          o.PaymentMode,
+          o.PaymentStatus,
+          o.OrderStatus
+        FROM OrderMaster o
+        WHERE o.OrderID = @OrderID
+      `);
+
+    if (orderResult.recordset.length === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const order = orderResult.recordset[0];
+
+    /* 2️⃣ ORDER ITEMS WITH IMAGE */
+
+    const itemsResult = await pool.request()
+      .input("OrderID", sql.Int, orderId)
+      .query(`
+        SELECT 
+          p.ProductName,
+          p.ProductWeight AS ProductWeight,
+          od.Quantity,
+          od.UnitPrice,
+          od.TotalPrice,
+
+          (
+            SELECT TOP 1 AttachmentFile
+            FROM Attachments a
+            WHERE a.ProductID = p.ProductID
+            ORDER BY a.SortOrder ASC
+          ) AS ImageUrl
+
+        FROM OrderDetails od
+        JOIN ProductMaster p 
+          ON od.ProductID = p.ProductID
+        WHERE od.OrderID = @OrderID
+      `);
+
+    const items = itemsResult.recordset.map(item => ({
+      productName: item.ProductName,
+      weight: item.ProductWeight || "",
+      qty: item.Quantity,
+      price: item.TotalPrice,
+      imageUrl: item.ImageUrl
+        ? `http://localhost:4000${item.ImageUrl}`
+        : null
+    }));
+
+    /* 3️⃣ FINAL RESPONSE */
+
+    res.json({
+      orderId: order.OrderID,
+      transactionDate: new Date(order.OrderDate).toDateString(),
+      paymentMethod: order.PaymentMode,
+      shippingMethod: "Shiprocket",
+
+      subtotal: order.SubTotalAmount,
+      discount: order.DiscountAmount,
+      couponDiscount:order.CouponDiscount,
+      gst: order.TaxAmount,
+      shipping: "FREE",
+      total: order.TotalAmount,
+
+      items
+    });
+
+  } catch (err) {
+
+    console.error("❌ ORDER FETCH ERROR:", err);
+
+    res.status(500).json({
+      message: "Failed to fetch order",
+      error: err.message
+    });
+
+  }
+});
+
+
+//to get the invoice details
+
+// app.get("/api/orders/user/:userId", async (req, res) => {
+//   try {
+
+//     const { userId } = req.params;
+
+//     const ordersResult = await new sql.Request()
+//       .input("UserID", sql.Int, userId)
+//       .query(`
+//         SELECT 
+//           o.OrderID,
+//           o.OrderDate,
+//           o.OrderStatus,
+//           o.PaymentStatus,
+//           o.SubTotalAmount,
+//           o.DiscountAmount,
+//           o.TaxAmount,
+//           o.TotalAmount
+//         FROM OrderMaster o
+//         WHERE o.UserID = @UserID
+//         ORDER BY o.OrderDate DESC
+//       `);
+
+//     const orders = [];
+
+//     for (let order of ordersResult.recordset) {
+
+//       const itemsResult = await new sql.Request()
+//         .input("OrderID", sql.Int, order.OrderID)
+//         .query(`
+//           SELECT 
+//             p.ProductName,
+//             p.ProductWeight,
+//             od.Quantity,
+//             od.UnitPrice,
+//             od.TotalPrice,
+
+//             (
+//               SELECT TOP 1 AttachmentFile
+//               FROM Attachments a
+//               WHERE a.ProductID = p.ProductID
+//               ORDER BY a.SortOrder ASC
+//             ) AS ImageUrl
+
+//           FROM OrderDetails od
+//           JOIN ProductMaster p 
+//             ON od.ProductID = p.ProductID
+//           WHERE od.OrderID = @OrderID
+//         `);
+
+//       orders.push({
+//         orderId: order.OrderID,
+//         orderDate: new Date(order.OrderDate).toDateString(),
+//         orderStatus: order.OrderStatus,
+//         paymentStatus: order.PaymentStatus,
+
+//         subTotal: order.SubTotalAmount,
+//         discount: order.DiscountAmount,
+//         tax: order.TaxAmount,
+//         finalAmount: order.TotalAmount,
+
+//         items: itemsResult.recordset.map(i => ({
+//           productName: i.ProductName,
+//           qty: i.Quantity,
+//           finalAmount: i.TotalPrice,
+//           weight: i.ProductWeight || "",
+//           imageUrl: i.ImageUrl
+//             ? `http://localhost:4000${i.ImageUrl}`
+//             : "https://via.placeholder.com/80"
+//         }))
+//       });
+
+//     }
+
+//     res.json({
+//       success: true,
+//       data: orders
+//     });
+
+//   } catch (err) {
+
+//     console.error("❌ USER ORDERS ERROR:", err);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch orders"
+//     });
+
+//   }
+// });
+
+
 app.get("/api/orders/user/:userId", async (req, res) => {
   try {
+
     const { userId } = req.params;
 
     const ordersResult = await new sql.Request()
@@ -2773,7 +3682,11 @@ app.get("/api/orders/user/:userId", async (req, res) => {
           o.OrderID,
           o.OrderDate,
           o.OrderStatus,
-          o.PaymentStatus
+          o.PaymentStatus,
+          o.SubTotalAmount,
+          o.DiscountAmount,
+          o.TaxAmount,
+          o.TotalAmount
         FROM OrderMaster o
         WHERE o.UserID = @UserID
         ORDER BY o.OrderDate DESC
@@ -2787,6 +3700,7 @@ app.get("/api/orders/user/:userId", async (req, res) => {
         .input("OrderID", sql.Int, order.OrderID)
         .query(`
           SELECT 
+            p.ProductID,
             p.ProductName,
             p.ProductWeight,
             od.Quantity,
@@ -2801,7 +3715,8 @@ app.get("/api/orders/user/:userId", async (req, res) => {
             ) AS ImageUrl
 
           FROM OrderDetails od
-          JOIN ProductMaster p ON od.ProductID = p.ProductID
+          JOIN ProductMaster p 
+            ON od.ProductID = p.ProductID
           WHERE od.OrderID = @OrderID
         `);
 
@@ -2810,30 +3725,46 @@ app.get("/api/orders/user/:userId", async (req, res) => {
         orderDate: new Date(order.OrderDate).toDateString(),
         orderStatus: order.OrderStatus,
         paymentStatus: order.PaymentStatus,
+
+        subTotal: order.SubTotalAmount,
+        discount: order.DiscountAmount,
+        tax: order.TaxAmount,
+        finalAmount: order.TotalAmount,
+
         items: itemsResult.recordset.map(i => ({
+          productId: i.ProductID,
           productName: i.ProductName,
           qty: i.Quantity,
-          price: i.TotalPrice,
+          unitPrice: i.UnitPrice,      // product price
+          totalPrice: i.TotalPrice,    // qty × price
           weight: i.ProductWeight || "",
           imageUrl: i.ImageUrl
             ? `http://localhost:4000${i.ImageUrl}`
             : "https://via.placeholder.com/80"
         }))
       });
+
     }
 
-    res.json({ success: true, data: orders });
+    res.json({
+      success: true,
+      data: orders
+    });
 
   } catch (err) {
+
     console.error("❌ USER ORDERS ERROR:", err);
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch orders"
     });
+
   }
 });
 
-//to get the invoice details
+
+
 app.get("/api/order/:orderId/invoice", (req, res) => {
   const { orderId } = req.params;
 
@@ -2862,8 +3793,8 @@ app.post("/api/payment/create", async (req, res) => {
       merchantTransactionId: merchantTxnId,
       merchantUserId: "USER001",
       amount: amount * 100,
-      redirectUrl: "http://localhost:4000/api/payment/redirect",
-      redirectMode: "POST",
+      redirectUrl: "http://localhost:5173",
+      redirectMode: "GET",
       callbackUrl: "http://localhost:4000/api/payment/callback",
       paymentInstrument: { type: "PAY_PAGE"}
     };
@@ -3353,6 +4284,8 @@ app.get("/api/attachments/:productId", async (req, res) => {
 //     }
 //   }
 // );
+
+
 app.post(
   "/api/attachments/:productId",
   productUpload.array("images", 4),
@@ -3448,19 +4381,324 @@ app.get("/api/attachments/:productId", async (req, res) => {
 });
 
 
+// app.put(
+//   "/api/attachments/:productId",
+//   productUpload.array("images", 4),
+//   async (req, res) => {
+//     try {
+//       const { productId } = req.params;
+
+//       const pool = await sql.connect(dbConfig);
+
+//       /* STEP 1 — GET OLD IMAGES */
+
+//       const oldImages = await pool.request()
+//         .input("ProductID", sql.Int, productId)
+//         .query(`
+//           SELECT AttachmentFile 
+//           FROM dbo.Attachments
+//           WHERE ProductID = @ProductID
+//         `);
+
+//       const fs = require("fs");
+//       const path = require("path");
+
+//       /* STEP 2 — DELETE FILES FROM SERVER */
+
+//       for (const img of oldImages.recordset) {
+
+//         const filePath = path.join(__dirname, img.AttachmentFile);
+
+//         if (fs.existsSync(filePath)) {
+//           fs.unlinkSync(filePath);
+//         }
+
+//       }
+
+//       /* STEP 3 — DELETE OLD DB RECORDS */
+
+//       await pool.request()
+//         .input("ProductID", sql.Int, productId)
+//         .query(`
+//           DELETE FROM dbo.Attachments
+//           WHERE ProductID = @ProductID
+//         `);
+
+//       /* STEP 4 — INSERT NEW IMAGES */
+
+//       if (req.files && req.files.length > 0) {
+
+//         for (let i = 0; i < req.files.length; i++) {
+
+//           const file = req.files[i];
+
+//           await pool.request()
+//             .input("ProductID", sql.Int, productId)
+//             .input("AttachmentName", sql.NVarChar(255), file.filename)
+//             .input("AttachmentFile", sql.NVarChar(500), `/uploads/products/${file.filename}`)
+//             .input("SortOrder", sql.Int, i + 1)
+//             .input("CreatedBy", sql.Int, 1)
+//             .query(`
+//               INSERT INTO dbo.Attachments
+//               (
+//                 ProductID,
+//                 Section,
+//                 SortOrder,
+//                 AttachmentName,
+//                 AttachmentFile,
+//                 CreatedBy,
+//                 CreatedDt
+//               )
+//               VALUES
+//               (
+//                 @ProductID,
+//                 'PRODUCT',
+//                 @SortOrder,
+//                 @AttachmentName,
+//                 @AttachmentFile,
+//                 @CreatedBy,
+//                 GETDATE()
+//               )
+//             `);
+
+//         }
+
+//       }
+
+//       res.json({
+//         success: true,
+//         message: "Product images updated successfully"
+//       });
+
+//     } catch (error) {
+
+//       console.error("❌ Update attachments failed:", error);
+
+//       res.status(500).json({
+//         success: false,
+//         message: "Failed to update images",
+//         error: error.message
+//       });
+
+//     }
+//   }
+// );
+
+app.put(
+  "/api/attachments/:productId",
+  productUpload.array("images", 4),
+  async (req, res) => {
+    try {
+      const { productId } = req.params;
+
+      const pool = await sql.connect(dbConfig);
+
+      // 🔥 ONLY INSERT NEW IMAGES - DON'T DELETE EXISTING ONES
+      
+      if (req.files && req.files.length > 0) {
+
+        // Get current max SortOrder to continue numbering
+        const maxSortResult = await pool.request()
+          .input("ProductID", sql.Int, productId)
+          .query(`
+            SELECT ISNULL(MAX(SortOrder), 0) as MaxSort
+            FROM dbo.Attachments
+            WHERE ProductID = @ProductID
+          `);
+
+        let startSort = maxSortResult.recordset[0].MaxSort + 1;
+
+        for (let i = 0; i < req.files.length; i++) {
+
+          const file = req.files[i];
+
+          await pool.request()
+            .input("ProductID", sql.Int, productId)
+            .input("AttachmentName", sql.NVarChar(255), file.filename)
+            .input("AttachmentFile", sql.NVarChar(500), `/uploads/products/${file.filename}`)
+            .input("SortOrder", sql.Int, startSort + i)
+            .input("CreatedBy", sql.Int, 1)
+            .query(`
+              INSERT INTO dbo.Attachments
+              (
+                ProductID,
+                Section,
+                SortOrder,
+                AttachmentName,
+                AttachmentFile,
+                CreatedBy,
+                CreatedDt
+              )
+              VALUES
+              (
+                @ProductID,
+                'PRODUCT',
+                @SortOrder,
+                @AttachmentName,
+                @AttachmentFile,
+                @CreatedBy,
+                GETDATE()
+              )
+            `);
+
+        }
+
+      }
+
+      res.json({
+        success: true,
+        message: "Product images updated successfully"
+      });
+
+    } catch (error) {
+
+      console.error("❌ Update attachments failed:", error);
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to update images",
+        error: error.message
+      });
+
+    }
+  }
+);
+app.put("/api/attachments/set-primary", async (req, res) => {
+  try {
+
+    const { productId, attachmentId } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    /* Push all images down */
+    await pool.request()
+      .input("ProductID", sql.Int, productId)
+      .query(`
+        UPDATE dbo.Attachments
+        SET SortOrder = SortOrder + 1
+        WHERE ProductID = @ProductID
+      `);
+
+    /* Set selected image as primary */
+    await pool.request()
+      .input("AttachmentID", sql.Int, attachmentId)
+      .query(`
+        UPDATE dbo.Attachments
+        SET SortOrder = 1
+        WHERE AttachmentID = @AttachmentID
+      `);
+
+    res.json({
+      success: true,
+      message: "Primary image updated"
+    });
+
+  } catch (error) {
+
+    console.error("Primary image update failed:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update primary image"
+    });
+
+  }
+});
+
+app.delete("/api/attachments/:id", async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const pool = await sql.connect(dbConfig);
+
+    // Get file path
+    const result = await pool.request()
+      .input("AttachmentID", sql.Int, id)
+      .query(`
+        SELECT AttachmentFile 
+        FROM Attachments 
+        WHERE AttachmentID = @AttachmentID
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ message: "Image not found" });
+    }
+
+    const filePath = result.recordset[0].AttachmentFile;
+
+    // Delete DB record
+    await pool.request()
+      .input("AttachmentID", sql.Int, id)
+      .query(`
+        DELETE FROM Attachments 
+        WHERE AttachmentID = @AttachmentID
+      `);
+
+    // Delete file from server
+    const fs = require("fs");
+    const path = require("path");
+
+    const fullPath = path.join(__dirname, filePath);
+
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
 //admin back office apis 
 //to get product categories from the db into admin/category 
+
+
+
+// app.get("/api/admin/product-categories", async (req, res) => {
+//   try {
+//     const result = await sql.query(`
+//       SELECT
+//         ProductCategoryID,
+//         CategoryName,
+//         CategoryDescription,
+//         CategoryImage,
+//         Status,              -- ✅ Include Status
+//         DisplayOrder
+//       FROM dbo.ProductCategory
+//       ORDER BY DisplayOrder ASC
+//     `);
+
+//     res.status(200).json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch categories",
+//       error: error.message
+//     });
+//   }
+// });
+
 app.get("/api/admin/product-categories", async (req, res) => {
   try {
+
     const result = await sql.query(`
       SELECT
         ProductCategoryID,
         CategoryName,
         CategoryDescription,
         CategoryImage,
-        Status,              -- ✅ Include Status
+        Status,
         DisplayOrder
       FROM dbo.ProductCategory
+      WHERE Status = 1
       ORDER BY DisplayOrder ASC
     `);
 
@@ -3470,11 +4708,128 @@ app.get("/api/admin/product-categories", async (req, res) => {
     });
 
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: "Failed to fetch categories",
       error: error.message
     });
+
+  }
+});
+
+
+app.put("/api/product-categories/:id", upload.single("CategoryImage"), async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const {
+      CategoryName,
+      CategoryDescription,
+      Status,
+      DisplayOrder,
+      ModifiedBy
+    } = req.body;
+
+    if (!CategoryName) {
+      return res.status(400).json({
+        success: false,
+        message: "CategoryName is required"
+      });
+    }
+
+    const imagePath = req.file
+      ? `/uploads/categories/${req.file.filename}`
+      : null;
+
+    const request = new sql.Request();
+
+    request.input("ProductCategoryID", sql.Int, id);
+    request.input("CategoryName", sql.NVarChar, CategoryName);
+    request.input("CategoryDescription", sql.NVarChar, CategoryDescription ?? null);
+    request.input("Status", sql.Bit, Status ?? 1);
+    request.input("DisplayOrder", sql.Int, DisplayOrder ?? 0);
+    request.input("ModifiedBy", sql.Int, ModifiedBy ?? 1);
+
+    let query = `
+      UPDATE dbo.ProductCategory
+      SET
+        CategoryName = @CategoryName,
+        CategoryDescription = @CategoryDescription,
+        Status = @Status,
+        DisplayOrder = @DisplayOrder,
+        ModifiedBy = @ModifiedBy,
+        ModifiedDt = GETDATE()
+    `;
+
+    if (imagePath) {
+      request.input("CategoryImage", sql.NVarChar, imagePath);
+      query += `, CategoryImage = @CategoryImage`;
+    }
+
+    query += ` WHERE ProductCategoryID = @ProductCategoryID`;
+
+    await request.query(query);
+
+    res.status(200).json({
+      success: true,
+      message: "Category updated successfully"
+    });
+
+  } catch (error) {
+
+    console.error("❌ Error updating category:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update category",
+      error: error.message
+    });
+
+  }
+});
+
+
+app.delete("/api/product-categories/:id", async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const request = new sql.Request();
+
+    request.input("ProductCategoryID", sql.Int, id);
+
+    const result = await request.query(`
+      UPDATE dbo.ProductCategory
+      SET 
+        Status = 0,
+        ModifiedDt = GETDATE()
+      WHERE ProductCategoryID = @ProductCategoryID
+    `);
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Category not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Category deleted successfully (soft delete)"
+    });
+
+  } catch (error) {
+
+    console.error("❌ Error deleting category:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete category",
+      error: error.message
+    });
+
   }
 });
 
@@ -3520,9 +4875,122 @@ app.get("/api/admin-products", async (req, res) => {
 });
 
 
+// app.get("/api/admin-products", async (req, res) => {
+//   try {
+//     const result = await sql.query(`
+//       SELECT 
+//         p.ProductID,
+//         p.ProductName,
+//         p.ProductCode,
+//         p.ProductWeight,
+//         p.Quantity,
+//         p.Status,
+
+//         pr.Price,
+//         pr.DiscountPrice,
+
+//         a.AttachmentFile AS ProductImage
+
+//       FROM dbo.ProductMaster p
+
+//       OUTER APPLY (
+//         SELECT TOP 1 Price, DiscountPrice
+//         FROM dbo.ProductPriceMaster
+//         WHERE ProductID = p.ProductID
+//         ORDER BY ProductPriceID DESC
+//       ) pr
+
+//       OUTER APPLY (
+//         SELECT TOP 1 AttachmentFile
+//         FROM dbo.Attachments
+//         WHERE ProductID = p.ProductID
+//         AND SortOrder = 1
+//       ) a
+
+//       ORDER BY p.ProductID DESC
+//     `);
+
+//     res.status(200).json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (error) {
+//     console.error("❌ Error fetching products:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch products",
+//       error: error.message
+//     });
+//   }
+// });
+
+
 // ==============================
 // ADMIN - GET ALL ORDERS WITH DELIVERY
 // ==============================
+// app.get("/api/admin/orders", async (req, res) => {
+//   try {
+//     const ordersResult = await new sql.Request().query(`
+//       SELECT 
+//         o.OrderID,
+//         o.UserID,
+//         u.FirstName,
+//         o.OrderDate,
+//         o.TotalAmount,
+//         o.PaymentMode,
+//         o.PaymentStatus,
+//         o.OrderStatus,
+//         d.ExpectedDeliveryDate,
+//         d.DeliveryStatus
+//       FROM OrderMaster o
+//       LEFT JOIN Delivery d ON o.OrderID = d.OrderID
+//       LEFT JOIN UserMaster u ON o.UserID = u.UserID  
+//       ORDER BY o.OrderDate DESC
+//     `);
+
+//     const orders = [];
+
+//     for (let order of ordersResult.recordset) {
+//       const itemsResult = await new sql.Request()
+//         .input("OrderID", sql.Int, order.OrderID)
+//         .query(`
+//           SELECT 
+//             p.ProductName,
+//             od.Quantity,
+//              p.ProductWeight,
+//             od.UnitPrice,
+//             od.TotalPrice
+//           FROM OrderDetails od
+//           JOIN ProductMaster p ON od.ProductID = p.ProductID
+//           WHERE od.OrderID = @OrderID
+//         `);
+
+//       orders.push({
+//         orderId: order.OrderID,
+//         userId: order.UserID,
+//         FirstName:order.FirstName,
+//         orderDate: new Date(order.OrderDate).toLocaleDateString(),
+//         expectedDelivery: order.ExpectedDeliveryDate
+//           ? new Date(order.ExpectedDeliveryDate).toLocaleDateString()
+//           : "-",
+//         deliveryStatus: order.DeliveryStatus,
+//         orderStatus: order.OrderStatus,
+//         paymentStatus: order.PaymentStatus,
+//         paymentMode: order.PaymentMode,
+//         totalAmount: order.TotalAmount,
+//         items: itemsResult.recordset
+//       });
+//     }
+
+//     res.json({ success: true, data: orders });
+
+//   } catch (err) {
+//     console.error("❌ ADMIN ORDER ERROR:", err);
+//     res.status(500).json({ success: false });
+//   }
+// });
+
 app.get("/api/admin/orders", async (req, res) => {
   try {
     const ordersResult = await new sql.Request().query(`
@@ -3530,11 +4998,20 @@ app.get("/api/admin/orders", async (req, res) => {
         o.OrderID,
         o.UserID,
         u.FirstName,
+        u.Email,
+        u.ContactNo,
+        u.CreatedDt,
         o.OrderDate,
         o.TotalAmount,
+        o.TaxAmount,
+        o.InvoiceNo,
         o.PaymentMode,
+        o.TransactionID,
         o.PaymentStatus,
         o.OrderStatus,
+
+        o.CouponCode,
+        o.CouponDiscount,
         d.ExpectedDeliveryDate,
         d.DeliveryStatus
       FROM OrderMaster o
@@ -3546,13 +5023,14 @@ app.get("/api/admin/orders", async (req, res) => {
     const orders = [];
 
     for (let order of ordersResult.recordset) {
+
       const itemsResult = await new sql.Request()
         .input("OrderID", sql.Int, order.OrderID)
         .query(`
           SELECT 
             p.ProductName,
+            p.ProductWeight,
             od.Quantity,
-             p.ProductWeight,
             od.UnitPrice,
             od.TotalPrice
           FROM OrderDetails od
@@ -3563,7 +5041,10 @@ app.get("/api/admin/orders", async (req, res) => {
       orders.push({
         orderId: order.OrderID,
         userId: order.UserID,
-        FirstName:order.FirstName,
+        email:order.Email,
+        contact:order.ContactNo,
+        regdate:order.CreatedDt,
+        customerName: order.FirstName,
         orderDate: new Date(order.OrderDate).toLocaleDateString(),
         expectedDelivery: order.ExpectedDeliveryDate
           ? new Date(order.ExpectedDeliveryDate).toLocaleDateString()
@@ -3573,6 +5054,12 @@ app.get("/api/admin/orders", async (req, res) => {
         paymentStatus: order.PaymentStatus,
         paymentMode: order.PaymentMode,
         totalAmount: order.TotalAmount,
+        taxAmount: order.TaxAmount,
+        invoiceNo: order.InvoiceNo,
+        transactionId: order.TransactionID,
+
+  couponCode: order.CouponCode,
+  couponDiscount: order.CouponDiscount,
         items: itemsResult.recordset
       });
     }
@@ -3652,7 +5139,6 @@ app.get("/api/admin/customers", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
-
 
 // app.get("/api/cart/recommendations/:userId", async (req, res) => {
 //   try {
@@ -3989,5 +5475,706 @@ app.put("/api/address/set-default/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false });
+  }
+});
+
+
+app.get("/api/admin/payments", async (req, res) => {
+  try {
+
+    const result = await sql.query(`
+      SELECT 
+        OM.OrderID,
+        OM.UserID,
+        UM.FirstName AS CustomerName,
+        OM.PaymentMode,
+        OM.OrderDate,
+        OM.TotalAmount,
+        OM.PaymentStatus,
+        OM.InvoiceNo
+      FROM OrderMaster OM
+      LEFT JOIN UserMaster UM ON OM.UserID = UM.UserID
+      ORDER BY OM.OrderDate DESC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("❌ ADMIN PAYMENT FETCH ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch payment records",
+      error: err.message
+    });
+  }
+});
+app.post("/api/admin/discount/create", async (req, res) => {
+  try {
+
+    const {
+      DiscountName,
+      CouponCode,
+      DiscountType,
+      DiscountValue,
+      ApplyTo,
+      ProductID,
+      CategoryID,
+      CustomerType,
+      MinOrderAmount,
+      MaxDiscount,
+      StartDate,
+      EndDate,
+      UsageLimit,
+      PerCustomer,
+      FirstOrderOnly,
+      Status
+    } = req.body;
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("DiscountName", sql.NVarChar, DiscountName)
+      .input("CouponCode", sql.NVarChar, CouponCode)
+      .input("DiscountType", sql.NVarChar, DiscountType)
+      .input("DiscountValue", sql.Decimal(10,2), Number(DiscountValue))
+      .input("ApplyTo", sql.NVarChar, ApplyTo)
+      .input("ProductID", sql.Int, ProductID || null)
+      .input("CategoryID", sql.Int, CategoryID || null)
+      .input("CustomerType", sql.NVarChar, CustomerType)
+      .input("MinOrderAmount", sql.Decimal(10,2), Number(MinOrderAmount))
+      .input("MaxDiscount", sql.Decimal(10,2), Number(MaxDiscount))
+      .input("StartDate", sql.Date, StartDate)
+      .input("EndDate", sql.Date, EndDate)
+      .input("UsageLimit", sql.Int, Number(UsageLimit))
+      .input("PerCustomer", sql.NVarChar, PerCustomer)
+      .input("FirstOrderOnly", sql.Bit, FirstOrderOnly)
+      .input("Status", sql.NVarChar, Status)
+      .input("CreatedBy", sql.NVarChar, "1")
+
+      .query(`
+        INSERT INTO Discounts
+        (
+          DiscountName,
+          CouponCode,
+          DiscountType,
+          DiscountValue,
+          ApplyTo,
+          ProductID,
+          CategoryID,
+          CustomerType,
+          MinOrderAmount,
+          MaxDiscount,
+          StartDate,
+          EndDate,
+          UsageLimit,
+          PerCustomer,
+          FirstOrderOnly,
+          Status,
+          CreatedBy,
+          CreatedDt
+        )
+        VALUES
+        (
+          @DiscountName,
+          @CouponCode,
+          @DiscountType,
+          @DiscountValue,
+          @ApplyTo,
+          @ProductID,
+          @CategoryID,
+          @CustomerType,
+          @MinOrderAmount,
+          @MaxDiscount,
+          @StartDate,
+          @EndDate,
+          @UsageLimit,
+          @PerCustomer,
+          @FirstOrderOnly,
+          @Status,
+          @CreatedBy,
+          GETDATE()
+        )
+      `);
+
+    res.json({
+      success: true,
+      message: "Discount created successfully"
+    });
+
+  } catch (error) {
+
+    console.log("DISCOUNT ERROR:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+});
+
+// app.get("/api/discounts", async (req, res) => {
+//   try {
+
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request().query(`
+//       SELECT *
+//       FROM Discounts
+//       WHERE Status = 'Active'
+//       AND GETDATE() BETWEEN StartDate AND EndDate
+//     `);
+
+//     res.json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (err) {
+
+//     console.log("DISCOUNT FETCH ERROR:", err);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch discounts"
+//     });
+//   }
+// });
+
+
+// app.get("/api/discounts", async (req, res) => {
+//   try {
+
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request().query(`
+//       SELECT 
+//         DiscountID,
+//         CouponCode,
+//         DiscountType,
+//         DiscountValue,
+//         MinOrderValue,
+//         MaxDiscount,
+//         StartDate,
+//         EndDate
+//       FROM Discounts
+//       WHERE Status = 'Active'
+//       AND GETDATE() BETWEEN StartDate AND EndDate
+//     `);
+
+//     res.json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (err) {
+
+//     console.log("DISCOUNT FETCH ERROR:", err);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch discounts"
+//     });
+
+//   }
+// });
+
+app.get("/api/discounts", async (req, res) => {
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request().query(`
+      SELECT 
+        DiscountID,
+        CouponCode,
+        DiscountType,
+        DiscountValue,
+        MinOrderAmount,   -- ✅ FIXED
+        MaxDiscount,
+        StartDate,
+        EndDate
+      FROM Discounts
+      WHERE LTRIM(RTRIM(LOWER(Status))) = 'active'
+      AND (
+        (StartDate IS NULL OR EndDate IS NULL)
+        OR GETDATE() BETWEEN StartDate AND EndDate
+      )
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.log("❌ DISCOUNT FETCH ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch discounts",
+      error: err.message
+    });
+  }
+});
+
+app.get("/api/admin/top-products", async (req, res) => {
+  try {
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request().query(`
+      SELECT TOP 4 
+        p.ProductName,
+        SUM(od.Quantity) AS TotalSold
+      FROM OrderDetails od
+      JOIN ProductMaster p 
+        ON od.ProductID = p.ProductID
+      GROUP BY p.ProductName
+      ORDER BY TotalSold DESC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+    console.error("Top products error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+app.get("/api/location/states", async (req, res) => {
+  try {
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request().query(`
+      SELECT id, name
+      FROM [Brihati].[dbo].[states]
+      ORDER BY name
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+
+    console.error("STATES API ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch states"
+    });
+
+  }
+});
+
+
+app.get("/api/location/cities/:stateId", async (req, res) => {
+
+  try {
+
+    const stateId = Number(req.params.stateId);
+
+    if (!stateId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid stateId"
+      });
+    }
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request()
+      .input("stateId", sql.Int, stateId)
+      .query(`
+        SELECT id, name
+        FROM [Brihati].[dbo].[cities]
+        WHERE state_id = @stateId
+        ORDER BY name
+      `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+
+    console.error("CITIES API ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch cities"
+    });
+
+  }
+
+});
+
+app.get("/api/location/pincodes", async (req, res) => {
+
+  try {
+
+    const { stateId, cityId } = req.query;
+
+    if (!stateId || !cityId) {
+      return res.status(400).json({
+        success: false,
+        message: "stateId and cityId are required"
+      });
+    }
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request()
+      .input("stateId", sql.Int, Number(stateId))
+      .input("cityId", sql.Int, Number(cityId))
+      .query(`
+        SELECT DISTINCT p.pincode, p.officename
+        FROM [Brihati].[dbo].[pincode] p
+        LEFT JOIN [Brihati].[dbo].[cities] c
+        ON c.id = @cityId
+        WHERE p.Stateid = @stateId
+        AND (
+            p.citiid = @cityId
+            OR p.Districtname LIKE '%Bangalore%'
+        )
+        ORDER BY p.pincode
+      `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (err) {
+
+    console.error("PINCODE API ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch pincodes"
+    });
+
+  }
+
+});
+
+// app.get("/api/location/pincodes", async (req, res) => {
+
+//   try {
+
+//     const { stateId, cityId } = req.query;
+
+//     if (!stateId || !cityId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "stateId and cityId are required"
+//       });
+//     }
+
+//     const pool = await sql.connect(dbConfig);
+
+//     const result = await pool.request()
+//       .input("stateId", sql.Int, Number(stateId))
+//       .input("cityId", sql.Int, Number(cityId))
+//       .query(`
+//         SELECT DISTINCT 
+//           p.pincode, 
+//           p.officename
+//         FROM [Brihati].[dbo].[pincode] p
+//         WHERE p.Stateid = @stateId
+//         AND p.citiid = @cityId
+//         ORDER BY p.pincode
+//       `);
+
+//     res.json({
+//       success: true,
+//       data: result.recordset
+//     });
+
+//   } catch (err) {
+
+//     console.error("PINCODE API ERROR:", err);
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch pincodes"
+//     });
+
+//   }
+
+// });
+
+
+
+app.get("/api/location/validate-pincode", async (req, res) => {
+
+  try {
+
+    const { stateId, cityId, pincode } = req.query;
+
+    if (!stateId || !cityId || !pincode) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing parameters"
+      });
+    }
+
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request()
+      .input("stateId", sql.Int, Number(stateId))
+      .input("cityId", sql.Int, Number(cityId))
+      .input("pincode", sql.NVarChar, pincode)
+      .query(`
+        SELECT COUNT(*) AS count
+        FROM [Brihati].[dbo].[pincode]
+        WHERE Stateid = @stateId
+        AND citiid = @cityId
+        AND pincode = @pincode
+      `);
+
+    res.json({
+      success: true,
+      valid: result.recordset[0].count > 0
+    });
+
+  } catch (err) {
+
+    console.error("PINCODE VALIDATION ERROR:", err);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+
+  }
+
+});
+
+app.get("/api/admin/discounts", async (req, res) => {
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool.request().query(`
+      SELECT 
+        DiscountID,
+        DiscountName,
+        CouponCode,
+        DiscountType,
+        DiscountValue,
+        ApplyTo,
+        ProductID,
+        CategoryID,
+        CustomerType,
+        MinOrderAmount,
+        MaxDiscount,
+        StartDate,
+        EndDate,
+        UsageLimit,
+        PerCustomer,
+        FirstOrderOnly,
+        Status
+      FROM Discounts
+      ORDER BY CreatedDt DESC
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset
+    });
+
+  } catch (error) {
+    console.log("Discount fetch error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch discounts", error: error.message });
+  }
+});
+
+
+app.post("/api/admin/discount/update", async (req, res) => {
+  try {
+    const {
+      DiscountID,
+      DiscountName,
+      CouponCode,
+      DiscountType,
+      DiscountValue,
+      ApplyTo,
+      ProductID,
+      CategoryID,
+      CustomerType,
+      MinOrderAmount,
+      MaxDiscount,
+      StartDate,
+      EndDate,
+      UsageLimit,
+      PerCustomer,
+      FirstOrderOnly,
+      Status
+    } = req.body;
+
+    if (!DiscountID) throw new Error("DiscountID is required for update");
+
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("DiscountID", sql.Int, DiscountID)
+      .input("DiscountName", sql.NVarChar, DiscountName)
+      .input("CouponCode", sql.NVarChar, CouponCode)
+      .input("DiscountType", sql.NVarChar, DiscountType)
+      .input("DiscountValue", sql.Decimal(10,2), Number(DiscountValue))
+      .input("ApplyTo", sql.NVarChar, ApplyTo)
+      .input("ProductID", sql.Int, ProductID || null)
+      .input("CategoryID", sql.Int, CategoryID || null)
+      .input("CustomerType", sql.NVarChar, CustomerType)
+      .input("MinOrderAmount", sql.Decimal(10,2), Number(MinOrderAmount))
+      .input("MaxDiscount", sql.Decimal(10,2), Number(MaxDiscount))
+      .input("StartDate", sql.Date, StartDate)
+      .input("EndDate", sql.Date, EndDate)
+      .input("UsageLimit", sql.Int, Number(UsageLimit))
+      .input("PerCustomer", sql.NVarChar, PerCustomer)
+      .input("FirstOrderOnly", sql.Bit, FirstOrderOnly)
+      .input("Status", sql.NVarChar, Status)
+      .query(`
+        UPDATE Discounts
+        SET
+          DiscountName = @DiscountName,
+          CouponCode = @CouponCode,
+          DiscountType = @DiscountType,
+          DiscountValue = @DiscountValue,
+          ApplyTo = @ApplyTo,
+          ProductID = @ProductID,
+          CategoryID = @CategoryID,
+          CustomerType = @CustomerType,
+          MinOrderAmount = @MinOrderAmount,
+          MaxDiscount = @MaxDiscount,
+          StartDate = @StartDate,
+          EndDate = @EndDate,
+          UsageLimit = @UsageLimit,
+          PerCustomer = @PerCustomer,
+          FirstOrderOnly = @FirstOrderOnly,
+          Status = @Status,
+          ModifiedBy = '1',
+          ModifiedDt = GETDATE()
+        WHERE DiscountID = @DiscountID
+      `);
+
+    res.json({ success: true, message: "Discount updated successfully" });
+
+  } catch (error) {
+    console.log("Discount update error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+
+// DELETE /api/admin/discount/:id
+app.delete("/api/admin/discount/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const pool = await sql.connect(dbConfig);
+
+    await pool.request()
+      .input("DiscountID", sql.Int, id)
+      .query(`
+        DELETE FROM Discounts
+        WHERE DiscountID = @DiscountID
+      `);
+
+    res.json({
+      success: true,
+      message: "Discount deleted successfully"
+    });
+
+  } catch (err) {
+    console.error("DELETE DISCOUNT ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete discount",
+      error: err.message
+    });
+  }
+});
+
+
+
+
+app.get("/api/product-full-details/:productId", async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const pool = await sql.connect(dbConfig);
+
+    /* PRODUCT DETAILS */
+    const productResult = await pool.request()
+      .input("ProductID", sql.Int, productId)
+      .query(`
+        SELECT 
+          p.ProductID,
+          p.ProductName,
+          p.ProductDescription,
+          p.ProductCode,
+          p.ProductWeight,
+          p.Quantity,
+          p.SKU,
+          p.Status,
+          p.ProductCategoryID,
+          c.CategoryName
+        FROM ProductMaster p
+        LEFT JOIN ProductCategory c
+        ON p.ProductCategoryID = c.ProductCategoryID
+        WHERE p.ProductID = @ProductID
+      `);
+
+    /* PRICE */
+    const priceResult = await pool.request()
+      .input("ProductID", sql.Int, productId)
+      .query(`
+        SELECT 
+          Price,
+          DiscountPrice
+        FROM ProductPriceMaster
+        WHERE ProductID = @ProductID
+      `);
+
+    /* IMAGES */
+    const imageResult = await pool.request()
+      .input("ProductID", sql.Int, productId)
+      .query(`
+        SELECT 
+          AttachmentID,
+          AttachmentFile,
+          SortOrder
+        FROM Attachments
+        WHERE ProductID = @ProductID
+        ORDER BY SortOrder ASC
+      `);
+
+    res.json({
+      success: true,
+      product: productResult.recordset[0],
+      price: priceResult.recordset[0] || {},
+      images: imageResult.recordset
+    });
+
+  } catch (error) {
+
+    console.error("❌ Product full details error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch product details",
+      error: error.message
+    });
   }
 });

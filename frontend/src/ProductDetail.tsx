@@ -150,6 +150,12 @@ import Footer from "./footer";
 import "./styles/productDetail.css";
 import { useCart } from "./context/CartContext";
 import { useWishlist } from "./context/WishlistContext";
+ import { toast } from "react-hot-toast";
+ import { showToast } from "./components/CustomToast";
+import tst_bfr from "./assets/toast_bfr_lgn.jpeg";
+import add_cart from "./assets/add_cart.png";
+import add_wish from  "./assets/add_wish.png";
+import rem_wish from "./assets/remove_wish.png";
 
 interface ProductAPI {
   ProductID: number;
@@ -171,6 +177,9 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<ProductAPI | null>(null);
   const [mainImage, setMainImage] = useState("");
   const [qty, setQty] = useState(1);
+
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+  const userId = user?.UserID;
 
   useEffect(() => {
     fetch(`${API_URLS.BASE_URL}products/${id}`)
@@ -266,6 +275,16 @@ const ProductDetail = () => {
             <button
               className="pd-btn"
               onClick={() => {
+                  if (!userId) {
+                                                showToast(
+                                                  tst_bfr,
+                                                  "Login Required",
+                                                  "Please login to add items to cart",
+                                                  "cart-login"
+                                                );
+                                                setTimeout(() => navigate("/login"), 1200);
+                                                return;
+                                              }
                 if (isInCart(product.ProductID)) {
                   navigate("/cart");
                 } else {
@@ -277,6 +296,13 @@ const ProductDetail = () => {
                     img: mainImage,
                     weight: product.ProductWeight,
                   });
+                                   showToast(
+                                                    add_cart,
+                                                    "Cart Updated",
+                                                    "Item added to cart successfully",
+                                                    "cart-added"
+                                                  );                  
+
                 }
               }}
             >
@@ -285,24 +311,54 @@ const ProductDetail = () => {
                 : "Add To Cart"}
             </button>
 
-            <button
-              className={`plist-wish ${
-                isInWishlist(product.ProductID) ? "active" : ""
-              }`}
-              onClick={() =>
-                toggleWishlist({
-                  id: product.ProductID,
-                  title: product.ProductName,
-                  category: product.ProductCategory,
-                  price: product.DiscountPrice || product.Price,
-                  img: mainImage,
-                  weight: product.ProductWeight,
-                  desc: product.ProductDescription
-                })
-              }
-            >
-              ❤
-            </button>
+           <button
+  className={`plist-wish ${
+    isInWishlist(product.ProductID) ? "active" : ""
+  }`}
+  onClick={() => {
+      if (!userId) {
+                                showToast(
+                                  tst_bfr,
+                                  "Login Required",
+                                  "Please login to add items to wishlist ❤️",
+                                  "wishlist-login"
+                                );
+                                setTimeout(() => navigate("/login"), 1200);
+                                return;
+                              }
+   
+    const alreadyInWishlist = isInWishlist(product.ProductID);
+
+    toggleWishlist({
+      id: product.ProductID,
+      title: product.ProductName,
+      category: product.ProductCategory,
+      price: product.DiscountPrice || product.Price,
+      img: mainImage,
+      weight: product.ProductWeight,
+      desc: product.ProductDescription,
+    });
+
+    if (alreadyInWishlist) {
+        showToast(
+                                      rem_wish,
+                                      "Wishlist Updated",
+                                      "Item removed from wishlist",
+                                      "wishlist-action"
+                                    );
+    } else {
+        showToast(
+                                 add_wish,
+                                 "Wishlist Updated",
+                                 "Item added to wishlist successfully",
+                                 "wishlist-action"
+                               );
+    }
+  }}
+>
+  <i className="fa-regular fa-heart"></i>
+</button>
+             
           </div>
 
           <div className="pd-desc">
